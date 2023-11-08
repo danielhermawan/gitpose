@@ -16,4 +16,13 @@
 
 <resources>
     <string name="app_name">Gitpose</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="common_server_error">There is problem with connection to server</string>
+
+    <string name="login_sign_in_button">SIGN IN WITH GITHUB</string>
+    <string name="login_github_logo">Github Logo</string>
+    <string name="login_github_error">Github authentication error</string>
+    <string name="login_sign_info_text_info">Use your personal account or Github Enterprise Cloud account to sign in on Github.com</string>
+    <string name="landing_button_logout">Logout</string>
 </resources>

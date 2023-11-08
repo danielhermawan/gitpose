@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 /*
  * Copyright (C) 2022 The Android Open Source Project
  *
@@ -21,7 +24,11 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt.gradle)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
+
+val apiKeyProperty = Properties()
+apiKeyProperty.load(FileInputStream(rootProject.file("clientkey.properties")))
 
 android {
     namespace = "com.coco.gitcompose"
@@ -38,6 +45,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String",  "CLIENT_ID", apiKeyProperty["CLIENT_ID"].toString())
+        buildConfigField("String",  "CLIENT_SECRET", apiKeyProperty["CLIENT_SECRET"].toString())
 
         // Enable room auto-migrations
         ksp {
@@ -64,7 +74,7 @@ android {
     buildFeatures {
         compose = true
         aidl = false
-        buildConfig = false
+        buildConfig = true
         renderScript = false
         shaders = false
     }
@@ -80,8 +90,26 @@ android {
     }
 }
 
+// Setup protobuf configuration, generating lite Java and Kotlin classes
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                register("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
 dependencies {
 
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.ui.graphics)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -110,10 +138,28 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Data Component
+    implementation(libs.androidx.dataStore.core)
+    implementation(libs.protobuf.java.lite)
+
+    // Network Components
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.chrometab)
+
     // Compose
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.coil.kt.compose)
+
+    // Util
+    implementation(libs.kotlinx.datetime)
+
     // Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
     // Instrumented tests
