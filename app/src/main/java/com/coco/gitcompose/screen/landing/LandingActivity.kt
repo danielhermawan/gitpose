@@ -24,25 +24,46 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coco.gitcompose.R
+import com.coco.gitcompose.core.ui.theme.Blue50
+import com.coco.gitcompose.core.ui.theme.Blue70
+import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import com.coco.gitcompose.screen.login.LoginActivity
+import com.coco.gitcompose.screen.login.LoginScreen
+import com.coco.gitcompose.screen.login.LoginUiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.collections.immutable.toImmutableList
 
 @AndroidEntryPoint
 class LandingActivity : ComponentActivity() {
@@ -65,8 +86,15 @@ class LandingActivity : ComponentActivity() {
                 ) {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+                    val snackbarHostState = remember { SnackbarHostState() }
+
                     LandingScreen(
-                        onLogoutClick = { viewModel.logout() }
+                        uiState = uiState,
+                        snackbarHostState = snackbarHostState,
+                        onLogoutClick = { viewModel.logout() },
+                        onBottomTabClick = { landingNav ->
+                            viewModel.onNavigationItemClick(landingNav)
+                        }
                     )
 
                     LaunchedEffect(uiState.isLogin) {
@@ -93,21 +121,75 @@ class LandingActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(
     modifier: Modifier = Modifier,
     uiState: LandingUiState = LandingUiState(),
-    onLogoutClick: () -> Unit = {}
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onLogoutClick: () -> Unit = {},
+    onBottomTabClick: (LandingNav) -> Unit = {}
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
+        },
+        topBar = {
+            Surface (
+                shadowElevation = 8.dp
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(text = stringResource(id = uiState.appBarTitle),
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                )
+            }
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = Color(0XFFbdbdbd)
+            ) {
+                for (navItem in uiState.navItems) {
+                    key(navItem.id) {
+                        NavigationBarItem(
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Blue50, selectedTextColor = Blue50,
+                                indicatorColor =  MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            selected = navItem.selected,
+                            onClick = { onBottomTabClick(navItem.id) },
+                            label = {
+                                Text(
+                                    text = stringResource(id = navItem.label),
+                                )
+                            },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (navItem.selected) navItem.selectedIcon else navItem.icon
+                                    ),
+                                    contentDescription = stringResource(id = navItem.label)
+                                )
+                            }
+                        )
+                    }
+                }
+
+            }
+        },
+        modifier = modifier
     ) { padding ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
         ) {
             Button(
                 modifier = Modifier.align(Alignment.Center),
@@ -115,6 +197,43 @@ fun LandingScreen(
             ) {
                 Text(text = stringResource(R.string.landing_button_logout))
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Login() {
+    GitposeTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val uiState = LandingUiState(
+                navItems = listOf(
+                    NavItem(
+                        id = LandingNav.HOME, appBarTitle = R.string.landing_tab_title_home,
+                        icon = R.drawable.ic_home_24, label = R.string.landing_tab_title_home,
+                        selected = true, selectedIcon = R.drawable.ic_home_filled_24
+                    ),
+                    NavItem(
+                        id = LandingNav.NOTIFICATIONS, appBarTitle = R.string.landing_tab_title_notification,
+                        icon = R.drawable.ic_notifications_24, label = R.string.landing_tab_title_notification,
+                        selected = false, selectedIcon = R.drawable.ic_notifications_filled_24
+                    ),
+                    NavItem(
+                        id = LandingNav.EXPLORE, appBarTitle = R.string.landing_tab_title_explore,
+                        icon = R.drawable.ic_explore_24, label = R.string.landing_tab_title_explore,
+                        selected = false, selectedIcon = R.drawable.ic_explore_filled_24px
+                    ),
+                    NavItem(
+                        id = LandingNav.PROFILE, appBarTitle = R.string.landing_tab_title_profile,
+                        icon = R.drawable.ic_person_24, label = R.string.landing_tab_title_profile,
+                        selected = false, selectedIcon = R.drawable.ic_person_filled_24
+                    )
+                ).toImmutableList()
+            )
+            LandingScreen(uiState = uiState)
         }
     }
 }

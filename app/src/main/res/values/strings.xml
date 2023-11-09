@@ -25,4 +25,8 @@
     <string name="login_github_error">Github authentication error</string>
     <string name="login_sign_info_text_info">Use your personal account or Github Enterprise Cloud account to sign in on Github.com</string>
     <string name="landing_button_logout">Logout</string>
+    <string name="landing_tab_title_home">Home</string>
+    <string name="landing_tab_title_notification">Notifications</string>
+    <string name="landing_tab_title_explore">Explore</string>
+    <string name="landing_tab_title_profile">Profile</string>
 </resources>

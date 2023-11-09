@@ -18,8 +18,10 @@ coroutines = "1.7.3"
 hilt = "2.48.1"
 junit = "4.13.2"
 kotlin = "1.9.10"
+kotlinxCollectionsImmutable = "0.3.6"
 kotlinxDatetime = "0.4.1"
 ksp = "1.9.10-1.0.13"
+materialIconsExtended = "1.5.4"
 moshi = "1.14.0"
 okhttp = "4.12.0"
 protobuf = "3.24.4"
@@ -32,6 +34,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "androidxComposeCompiler" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3"}
+androidx-compose-material-icon-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui"}
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview"}
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4"}
@@ -58,6 +61,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }

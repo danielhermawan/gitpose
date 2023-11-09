@@ -26,7 +26,7 @@ import com.coco.gitcompose.data.di.fakeGitRepositorys
 import com.coco.gitcompose.screen.landing.LandingActivity
 
 @HiltAndroidTest
-class NavigationTest {
+class LandingNavTest {
 
     @get:Rule(order = 0)
     var hiltRule = HiltAndroidRule(this)

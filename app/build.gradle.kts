@@ -159,6 +159,7 @@ dependencies {
 
     // Util
     implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.collections.immutable)
 
     // Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)

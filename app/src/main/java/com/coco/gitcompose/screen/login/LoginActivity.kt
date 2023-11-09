@@ -45,7 +45,7 @@ import com.coco.gitcompose.R
 import com.coco.gitcompose.core.goToGithubPrivacyPage
 import com.coco.gitcompose.core.goToGithubTermPage
 import com.coco.gitcompose.core.openChromeTab
-import com.coco.gitcompose.core.ui.theme.Blue40
+import com.coco.gitcompose.core.ui.theme.Blue50
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import com.coco.gitcompose.screen.landing.LandingActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -194,7 +194,7 @@ fun LoginScreen(
                     )
                     withStyle(
                         style = SpanStyle(
-                            color = Blue40, textDecoration = TextDecoration.Underline
+                            color = Blue50, textDecoration = TextDecoration.Underline
                         )
                     ) {
                         append("Terms of use")
@@ -209,7 +209,7 @@ fun LoginScreen(
                     )
                     withStyle(
                         style = SpanStyle(
-                            color = Blue40, textDecoration = TextDecoration.Underline
+                            color = Blue50, textDecoration = TextDecoration.Underline
                         )
                     ) {
                         append("Privacy policy")

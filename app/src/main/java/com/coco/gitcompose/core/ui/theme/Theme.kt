@@ -28,8 +28,12 @@ import androidx.core.view.ViewCompat
 
 private val LightColorScheme = lightColorScheme(
     primary = Black80,
-    secondary = White80,
+    secondary = Grey30,
     tertiary = Pink40,
+    primaryContainer = White80,
+    onPrimaryContainer = Black40,
+    background = Grey10,
+    onSecondaryContainer = Blue50
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

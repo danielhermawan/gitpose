@@ -7,8 +7,10 @@ import androidx.datastore.dataStoreFile
 import com.coco.gitcompose.core.common.ApplicationScope
 import com.coco.gitcompose.core.common.Dispatcher
 import com.coco.gitcompose.core.common.GitposeDispatchers
+import com.coco.gitcompose.core.datastore.CurrentUserSerializer
 import com.coco.gitcompose.core.datastore.GithubTokenSerializer
 import com.coco.gitcompose.data.GithubToken
+import com.coco.gitcompose.datamodel.CurrentUser
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,6 +34,22 @@ object DataStoreModule {
     ): DataStore<GithubToken> {
         return DataStoreFactory.create(
             githubTokenSerializer,
+            scope = CoroutineScope(scope.coroutineContext + ioDispatcher)
+        ) {
+            context.dataStoreFile("user_preferences.pb")
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrentUserDataStore(
+        @ApplicationContext context: Context,
+        currentUserSerializer: CurrentUserSerializer,
+        @Dispatcher(GitposeDispatchers.IO) ioDispatcher: CoroutineDispatcher,
+        @ApplicationScope scope: CoroutineScope,
+    ): DataStore<CurrentUser> {
+        return DataStoreFactory.create(
+            currentUserSerializer,
             scope = CoroutineScope(scope.coroutineContext + ioDispatcher)
         ) {
             context.dataStoreFile("user_preferences.pb")

@@ -24,13 +24,10 @@ interface GithubAuthUseCase {
 
     suspend fun logout()
 
-    suspend fun getCurrentUser(): CurrentUserResponse
-
 }
 
 class DefaultAuthUseCase @Inject constructor(
     private val dataStoreToken: DataStore<GithubToken>,
-    private val githubService: GithubService,
     private val sessionTokenManager: SessionTokenManager,
     @Dispatcher(GitposeDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) : GithubAuthUseCase {
@@ -56,12 +53,6 @@ class DefaultAuthUseCase @Inject constructor(
     override suspend fun logout() {
         dataStoreToken.updateData {
             it.toBuilder().clear().build()
-        }
-    }
-
-    override suspend fun getCurrentUser(): CurrentUserResponse {
-        return withContext(ioDispatcher) {
-            githubService.getCurrentUser()
         }
     }
 }

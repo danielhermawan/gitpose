@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "com.coco.gitcompose.datamodel";
+option java_multiple_files = true;
+
+message CurrentUser {
+  string login = 1;
+  string avatarUrl = 2;
+  string name = 3;
+  optional string email = 4;
+  optional string bio = 5;
+  int32 followers = 6;
+  int32 following = 7;
+  optional int32 totalPrivateRepos = 8;
+  optional int32 ownedPrivateRepos = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
