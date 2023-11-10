@@ -22,6 +22,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +65,7 @@ import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import com.coco.gitcompose.screen.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @AndroidEntryPoint
@@ -87,11 +89,8 @@ class LandingActivity : ComponentActivity() {
                 ) {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-                    val snackbarHostState = remember { SnackbarHostState() }
-
                     LandingScreen(
                         uiState = uiState,
-                        snackbarHostState = snackbarHostState,
                         onLogoutClick = { viewModel.logout() },
                         onBottomTabClick = { landingNav ->
                             viewModel.onNavigationItemClick(landingNav)
@@ -125,7 +124,6 @@ class LandingActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(
     modifier: Modifier = Modifier,
@@ -144,71 +142,14 @@ fun LandingScreen(
             )
         },
         topBar = {
-            Surface (
-                shadowElevation = 8.dp
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = uiState.appBarTitle),
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
+            LandingAppBar(title =  uiState.appBarTitle )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = Color(0XFFbdbdbd)
-            ) {
-                for (navItem in uiState.navItems) {
-                    key(navItem.id) {
-                        NavigationBarItem(
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Blue90, selectedTextColor = Blue90,
-                                indicatorColor =  MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            selected = navItem.selected,
-                            onClick = { onBottomTabClick(navItem.id) },
-                            label = {
-                                Text(
-                                    text = stringResource(id = navItem.label),
-                                )
-                            },
-                            icon = {
-                                if (navItem.id == LandingNav.PROFILE && !uiState.profilePictureUrl.isNullOrEmpty()) {
-                                    var imageModifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                    if (navItem.selected) {
-                                        imageModifier = imageModifier.border(1.dp, Blue90, CircleShape)
-                                    }
-                                    AsyncImage(
-                                        model = uiState.profilePictureUrl,
-                                        contentDescription = stringResource(id = navItem.label),
-                                        placeholder = painterResource(id = R.drawable.ic_person_filled_24),
-                                        contentScale = ContentScale.Crop,
-                                        modifier = imageModifier
-
-                                    )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(
-                                            id = if (navItem.selected) navItem.selectedIcon else navItem.icon
-                                        ),
-                                        contentDescription = stringResource(id = navItem.label),
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-
-            }
+            LandingNavigationBar(
+                navItems = uiState.navItems,
+                profilePictureUrl = uiState.profilePictureUrl,
+                onBottomTabClick = onBottomTabClick
+            )
         },
         modifier = modifier
     ) { padding ->
@@ -222,6 +163,88 @@ fun LandingScreen(
                 onClick = { onLogoutClick() }
             ) {
                 Text(text = stringResource(R.string.landing_button_logout))
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LandingAppBar(
+    modifier: Modifier = Modifier,
+    @StringRes title: Int
+) {
+    Surface(
+        modifier = modifier,
+        shadowElevation = 8.dp
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    text = stringResource(id = title),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        )
+    }
+}
+
+@Composable
+fun LandingNavigationBar(
+    modifier: Modifier = Modifier,
+    navItems: ImmutableList<NavItem> = emptyList<NavItem>().toImmutableList(),
+    profilePictureUrl: String? = null,
+    onBottomTabClick: (LandingNav) -> Unit = {}
+) {
+    NavigationBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = Color(0XFFbdbdbd)
+    ) {
+        for (navItem in navItems) {
+            key(navItem.id) {
+                NavigationBarItem(
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Blue90, selectedTextColor = Blue90,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    selected = navItem.selected,
+                    onClick = { onBottomTabClick(navItem.id) },
+                    label = {
+                        Text(
+                            text = stringResource(id = navItem.label),
+                        )
+                    },
+                    icon = {
+                        if (navItem.id == LandingNav.PROFILE && !profilePictureUrl.isNullOrEmpty()) {
+                            var imageModifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                            if (navItem.selected) {
+                                imageModifier = imageModifier.border(1.dp, Blue90, CircleShape)
+                            }
+                            AsyncImage(
+                                model = profilePictureUrl,
+                                contentDescription = stringResource(id = navItem.label),
+                                placeholder = painterResource(id = R.drawable.ic_person_filled_24),
+                                contentScale = ContentScale.Crop,
+                                modifier = imageModifier
+
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (navItem.selected) navItem.selectedIcon else navItem.icon
+                                ),
+                                contentDescription = stringResource(id = navItem.label),
+                            )
+                        }
+                    }
+                )
             }
         }
     }
@@ -243,9 +266,12 @@ fun Login() {
                         selected = true, selectedIcon = R.drawable.ic_home_filled_24
                     ),
                     NavItem(
-                        id = LandingNav.NOTIFICATIONS, appBarTitle = R.string.landing_tab_title_notification,
-                        icon = R.drawable.ic_notifications_24, label = R.string.landing_tab_title_notification,
-                        selected = false, selectedIcon = R.drawable.ic_notifications_filled_24
+                        id = LandingNav.NOTIFICATIONS,
+                        appBarTitle = R.string.landing_tab_title_notification,
+                        icon = R.drawable.ic_notifications_24,
+                        label = R.string.landing_tab_title_notification,
+                        selected = false,
+                        selectedIcon = R.drawable.ic_notifications_filled_24
                     ),
                     NavItem(
                         id = LandingNav.EXPLORE, appBarTitle = R.string.landing_tab_title_explore,

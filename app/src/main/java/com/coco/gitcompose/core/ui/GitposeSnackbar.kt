@@ -1,5 +1,6 @@
 package com.coco.gitcompose.core.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -19,7 +20,7 @@ enum class MessageType {
 }
 
 data class SnackbarState(
-    val message: Int,
+    @StringRes val message: Int,
     val messageType: MessageType = MessageType.INFO
 )
 
