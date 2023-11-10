@@ -37,3 +37,5 @@ val Grey10 = Color(0XFFeeeeee)
 val Blue50 = Color(0xFF2196f3)
 val Blue90 = Color(0XFF01579b)
 val Blue70 = Color(0XFF2962ff)
+
+val Green50 = Color(0XFF4CAF50)

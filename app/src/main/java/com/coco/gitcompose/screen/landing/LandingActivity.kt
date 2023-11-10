@@ -22,10 +22,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +36,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,21 +48,21 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.coco.gitcompose.R
-import com.coco.gitcompose.core.ui.theme.Blue50
-import com.coco.gitcompose.core.ui.theme.Blue70
+import com.coco.gitcompose.core.ui.GitposeSnackbarHost
 import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import com.coco.gitcompose.screen.login.LoginActivity
-import com.coco.gitcompose.screen.login.LoginScreen
-import com.coco.gitcompose.screen.login.LoginUiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.toImmutableList
 
@@ -94,6 +95,9 @@ class LandingActivity : ComponentActivity() {
                         onLogoutClick = { viewModel.logout() },
                         onBottomTabClick = { landingNav ->
                             viewModel.onNavigationItemClick(landingNav)
+                        },
+                        onSnackbarShown = {
+                            viewModel.onSnackbarMessageShown()
                         }
                     )
 
@@ -128,11 +132,16 @@ fun LandingScreen(
     uiState: LandingUiState = LandingUiState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onLogoutClick: () -> Unit = {},
-    onBottomTabClick: (LandingNav) -> Unit = {}
+    onBottomTabClick: (LandingNav) -> Unit = {},
+    onSnackbarShown: () -> Unit = {}
 ) {
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            GitposeSnackbarHost(
+                hostState = snackbarHostState,
+                snackbarStateState = uiState.snackbarState,
+                onSnackbarMessageShown = onSnackbarShown
+            )
         },
         topBar = {
             Surface (
@@ -160,7 +169,7 @@ fun LandingScreen(
                     key(navItem.id) {
                         NavigationBarItem(
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Blue50, selectedTextColor = Blue50,
+                                selectedIconColor = Blue90, selectedTextColor = Blue90,
                                 indicatorColor =  MaterialTheme.colorScheme.primaryContainer
                             ),
                             selected = navItem.selected,
@@ -171,12 +180,29 @@ fun LandingScreen(
                                 )
                             },
                             icon = {
-                                Icon(
-                                    painter = painterResource(
-                                        id = if (navItem.selected) navItem.selectedIcon else navItem.icon
-                                    ),
-                                    contentDescription = stringResource(id = navItem.label)
-                                )
+                                if (navItem.id == LandingNav.PROFILE && !uiState.profilePictureUrl.isNullOrEmpty()) {
+                                    var imageModifier = Modifier
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                    if (navItem.selected) {
+                                        imageModifier = imageModifier.border(1.dp, Blue90, CircleShape)
+                                    }
+                                    AsyncImage(
+                                        model = uiState.profilePictureUrl,
+                                        contentDescription = stringResource(id = navItem.label),
+                                        placeholder = painterResource(id = R.drawable.ic_person_filled_24),
+                                        contentScale = ContentScale.Crop,
+                                        modifier = imageModifier
+
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(
+                                            id = if (navItem.selected) navItem.selectedIcon else navItem.icon
+                                        ),
+                                        contentDescription = stringResource(id = navItem.label),
+                                    )
+                                }
                             }
                         )
                     }
@@ -240,6 +266,7 @@ fun Login() {
 
 //todo: make generic snackbar handling, appbar and custom scaffold
 //todo: make state saved automaticly in saved state
-//todo: Move github service to build config
-//todo: Clean up interceptor
+//todo: separate ui to diffrent function
+//todo: standarized color
+//todo: Clean up module
 //todo: create good navigation

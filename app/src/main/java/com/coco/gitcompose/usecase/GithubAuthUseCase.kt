@@ -29,7 +29,6 @@ interface GithubAuthUseCase {
 class DefaultAuthUseCase @Inject constructor(
     private val dataStoreToken: DataStore<GithubToken>,
     private val sessionTokenManager: SessionTokenManager,
-    @Dispatcher(GitposeDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) : GithubAuthUseCase {
     override fun isLogin(): Flow<Boolean> {
         return dataStoreToken.data.map {

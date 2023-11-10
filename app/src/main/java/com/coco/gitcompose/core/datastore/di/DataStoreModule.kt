@@ -36,7 +36,7 @@ object DataStoreModule {
             githubTokenSerializer,
             scope = CoroutineScope(scope.coroutineContext + ioDispatcher)
         ) {
-            context.dataStoreFile("user_preferences.pb")
+            context.dataStoreFile("github_token.pb")
         }
     }
 
@@ -52,7 +52,7 @@ object DataStoreModule {
             currentUserSerializer,
             scope = CoroutineScope(scope.coroutineContext + ioDispatcher)
         ) {
-            context.dataStoreFile("user_preferences.pb")
+            context.dataStoreFile("current_user.pb")
         }
     }
 }
