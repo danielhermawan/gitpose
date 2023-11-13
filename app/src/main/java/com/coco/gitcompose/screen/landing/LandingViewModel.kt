@@ -12,10 +12,12 @@ import com.coco.gitcompose.usecase.GithubAuthUseCase
 import com.coco.gitcompose.usecase.GithubUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,17 +50,28 @@ class LandingViewModel @Inject constructor(
                         appBarTitle = getAppBarTitle()
                     )
                 }
-                try {
-                   githubUserUserCase.getStreamCurrentUser(true)
-                } catch (ex: Exception) {
-                    Log.e(LandingViewModel::class.simpleName, ex.message, ex)
-                    _uiState.update {
-                        it.copy(
-                            snackbarState = SnackbarState(R.string.landing_error_load_user_data, MessageType.ERROR)
-                        )
+                githubUserUserCase.getStreamCurrentUser(true)
+                    .catch { ex ->
+                        Log.e(LandingViewModel::class.simpleName, ex.message, ex)
+                        _uiState.update {
+                            it.copy(
+                                snackbarState = SnackbarState(
+                                    R.string.landing_error_load_user_data,
+                                    MessageType.ERROR
+                                )
+                            )
+                        }
                     }
-                }
+                    .collect { currentUser ->
+                        updateCurrentUserData(currentUser)
+                    }
             }
+        }
+    }
+
+    fun onSnackbarEvent(snackbarState: SnackbarState?) {
+        _uiState.update {
+            it.copy(snackbarState = snackbarState)
         }
     }
 
@@ -73,16 +86,11 @@ class LandingViewModel @Inject constructor(
             navItem.copy(selected = selectedNav == navItem.id)
         }.toImmutableList()
         _uiState.update {
-            it.copy(navItems = navItems, appBarTitle = getAppBarTitle(selectedNav))
-        }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            githubAuthUseCase.logout()
-            _uiState.update {
-                it.copy(logoutSuccess = true)
-            }
+            it.copy(
+                navItems = navItems,
+                appBarTitle = getAppBarTitle(selectedNav),
+                selectedTab = selectedNav
+            )
         }
     }
 

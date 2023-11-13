@@ -7,6 +7,7 @@ import com.coco.gitcompose.core.generateGithubAuthUrl
 import com.coco.gitcompose.core.network.GithubService
 import com.coco.gitcompose.core.network.SessionTokenManager
 import com.coco.gitcompose.data.GithubToken
+import com.coco.gitcompose.datamodel.CurrentUser
 import com.coco.gitcompose.datamodel.CurrentUserResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ interface GithubAuthUseCase {
 
 class DefaultAuthUseCase @Inject constructor(
     private val dataStoreToken: DataStore<GithubToken>,
+    private val dataStoreCurrentUser: DataStore<CurrentUser>,
     private val sessionTokenManager: SessionTokenManager,
 ) : GithubAuthUseCase {
     override fun isLogin(): Flow<Boolean> {
@@ -53,5 +55,9 @@ class DefaultAuthUseCase @Inject constructor(
         dataStoreToken.updateData {
             it.toBuilder().clear().build()
         }
+        dataStoreCurrentUser.updateData {
+            it.toBuilder().clear().build()
+        }
+
     }
 }

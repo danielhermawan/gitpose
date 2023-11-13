@@ -8,6 +8,7 @@ import com.coco.gitcompose.datamodel.CurrentUser
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -48,10 +49,11 @@ class DefaultGithubUserUserCase @Inject constructor(
                     .setBio(response.bio ?: "")
                     .setFollowers(response.followers)
                     .setFollowing(response.following)
-                    .setTotalPrivateRepos(response.totalPrivateRepos ?: 0)
-                    .setOwnedPrivateRepos(response.ownedPrivateRepos ?: 0)
+                    .setTotalPrivateRepos(response.totalPrivateRepos)
+                    .setOwnedPrivateRepos(response.ownedPrivateRepos)
                     .setCreatedAt(response.createdAt)
                     .setUpdatedAt(response.updatedAt)
+                    .setPublicRepos(response.publicRepos)
                     .build()
             }
         }
@@ -60,19 +62,21 @@ class DefaultGithubUserUserCase @Inject constructor(
 
     override fun getStreamCurrentUser(refresh: Boolean): Flow<CurrentUser> {
         return _currentUser.onStart {
-            if (refresh) {
-                getRemoteCurrentUser()
+            val localCurrentUser = getLocalCurrentUser()
+            _currentUser.update {
+                localCurrentUser
             }
-        }.map { user ->
-            user ?: getLocalCurrentUser()
-        }
-
+            emit(localCurrentUser)
+            if (refresh) {
+                refreshCurrentUser()
+            }
+        }.filterNotNull()
     }
 
     override suspend fun refreshCurrentUser() {
         val newCurrentUser = getRemoteCurrentUser()
         _currentUser.update {
-            newCurrentUser
+            newCurrentUser.toBuilder().setBio(System.currentTimeMillis().toString()).build()
         }
     }
 }

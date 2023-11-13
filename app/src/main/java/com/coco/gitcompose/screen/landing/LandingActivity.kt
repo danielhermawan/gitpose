@@ -61,8 +61,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.coco.gitcompose.R
 import com.coco.gitcompose.core.ui.GitposeSnackbarHost
+import com.coco.gitcompose.core.ui.SnackbarState
 import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
+import com.coco.gitcompose.screen.landing.profile.ProfileTab
 import com.coco.gitcompose.screen.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
@@ -91,9 +93,14 @@ class LandingActivity : ComponentActivity() {
 
                     LandingScreen(
                         uiState = uiState,
-                        onLogoutClick = { viewModel.logout() },
+                        onLogoutSuccess = {
+                            navigateToLogin()
+                        },
                         onBottomTabClick = { landingNav ->
                             viewModel.onNavigationItemClick(landingNav)
+                        },
+                        onSnackbarEvent = { snackbarState ->
+                            viewModel.onSnackbarEvent(snackbarState)
                         },
                         onSnackbarShown = {
                             viewModel.onSnackbarMessageShown()
@@ -106,11 +113,6 @@ class LandingActivity : ComponentActivity() {
                         }
                     }
 
-                    LaunchedEffect(uiState.logoutSuccess) {
-                        if (uiState.logoutSuccess) {
-                            navigateToLogin()
-                        }
-                    }
                 }
             }
         }
@@ -129,8 +131,9 @@ fun LandingScreen(
     modifier: Modifier = Modifier,
     uiState: LandingUiState = LandingUiState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onLogoutClick: () -> Unit = {},
+    onLogoutSuccess: () -> Unit = {},
     onBottomTabClick: (LandingNav) -> Unit = {},
+    onSnackbarEvent: (SnackbarState?) -> Unit = {},
     onSnackbarShown: () -> Unit = {}
 ) {
     Scaffold(
@@ -153,18 +156,14 @@ fun LandingScreen(
         },
         modifier = modifier
     ) { padding ->
-        Box(
+        ProfileTab(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-        ) {
-            Button(
-                modifier = Modifier.align(Alignment.Center),
-                onClick = { onLogoutClick() }
-            ) {
-                Text(text = stringResource(R.string.landing_button_logout))
-            }
-        }
+                .padding(padding),
+            onLogoutSuccess = onLogoutSuccess,
+            onSnackbarEvent = onSnackbarEvent,
+            selectedTab = uiState.selectedTab
+        )
     }
 }
 

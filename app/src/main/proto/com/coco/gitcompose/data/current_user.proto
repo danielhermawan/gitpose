@@ -15,4 +15,5 @@ message CurrentUser {
   optional int32 ownedPrivateRepos = 9;
   string createdAt = 10;
   string updatedAt = 11;
+  optional int32 publicRepos = 12;
 }

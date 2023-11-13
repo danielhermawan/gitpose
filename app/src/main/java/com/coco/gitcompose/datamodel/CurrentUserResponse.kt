@@ -15,6 +15,7 @@ data class CurrentUserResponse(
     val following: Int,
     @Json(name = "total_private_repos") val totalPrivateRepos: Int = 0,
     @Json(name = "owned_private_repos") val ownedPrivateRepos: Int = 0,
+    @Json(name = "public_repos") val publicRepos: Int = 0,
     @Json(name = "created_at") val createdAt: String,
     @Json(name = "updated_at") val updatedAt: String
 )

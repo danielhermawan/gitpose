@@ -9,11 +9,11 @@ import kotlinx.collections.immutable.toImmutableList
 
 data class LandingUiState(
     val isLogin: Boolean = true,
-    val logoutSuccess: Boolean = false,
     @StringRes val appBarTitle: Int = R.string.landing_tab_title_home,
     val navItems: ImmutableList<NavItem> = emptyList<NavItem>().toImmutableList(),
     val snackbarState: SnackbarState? = null,
-    val profilePictureUrl: String? = null
+    val profilePictureUrl: String? = null,
+    val selectedTab: LandingNav = LandingNav.HOME
 )
 
 enum class LandingNav {
