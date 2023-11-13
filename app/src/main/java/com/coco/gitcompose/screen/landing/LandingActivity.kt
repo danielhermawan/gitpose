@@ -142,7 +142,7 @@ fun LandingScreen(
             )
         },
         topBar = {
-            LandingAppBar(title =  uiState.appBarTitle )
+            LandingAppBar(title = uiState.appBarTitle)
         },
         bottomBar = {
             LandingNavigationBar(
