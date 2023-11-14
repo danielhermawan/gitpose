@@ -30,4 +30,5 @@
     <string name="landing_tab_title_explore">Explore</string>
     <string name="landing_tab_title_profile">Profile</string>
     <string name="landing_error_load_user_data">Failed to load user data</string>
+    <string name="landing_error_load_repo_data">Failed to load repo data</string>
 </resources>

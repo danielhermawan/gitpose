@@ -5,12 +5,13 @@ import com.coco.gitcompose.core.common.Dispatcher
 import com.coco.gitcompose.core.common.GitposeDispatchers
 import com.coco.gitcompose.core.network.GithubService
 import com.coco.gitcompose.datamodel.CurrentUser
+import com.coco.gitcompose.datamodel.RepoDataModel
+import com.coco.gitcompose.datamodel.RepoSort
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -23,14 +24,18 @@ interface GithubUserUseCase {
 
     fun getStreamCurrentUser(refresh: Boolean): Flow<CurrentUser>
 
+    suspend fun getRemoteCurrentUserRepository(
+        sort: RepoSort = RepoSort.full_name, perPage: Int = 30, page: Int = 1
+    ): List<RepoDataModel>
+
     suspend fun refreshCurrentUser()
 }
 
-class DefaultGithubUserUserCase @Inject constructor(
+class DefaultGithubUserUseCase @Inject constructor(
     private val githubService: GithubService,
     private val currentUserDataStore: DataStore<CurrentUser>,
     @Dispatcher(GitposeDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
-): GithubUserUseCase {
+) : GithubUserUseCase {
     private val _currentUser = MutableStateFlow<CurrentUser?>(null)
 
     override suspend fun getLocalCurrentUser(): CurrentUser {
@@ -59,6 +64,12 @@ class DefaultGithubUserUserCase @Inject constructor(
         }
     }
 
+    override suspend fun refreshCurrentUser() {
+        val newCurrentUser = getRemoteCurrentUser()
+        _currentUser.update {
+            newCurrentUser.toBuilder().setBio(System.currentTimeMillis().toString()).build()
+        }
+    }
 
     override fun getStreamCurrentUser(refresh: Boolean): Flow<CurrentUser> {
         return _currentUser.onStart {
@@ -73,10 +84,13 @@ class DefaultGithubUserUserCase @Inject constructor(
         }.filterNotNull()
     }
 
-    override suspend fun refreshCurrentUser() {
-        val newCurrentUser = getRemoteCurrentUser()
-        _currentUser.update {
-            newCurrentUser.toBuilder().setBio(System.currentTimeMillis().toString()).build()
+    override suspend fun getRemoteCurrentUserRepository(
+        sort: RepoSort,
+        perPage: Int,
+        page: Int
+    ): List<RepoDataModel> {
+        return withContext(ioDispatcher) {
+            githubService.getCurrentUserRepos(sort, perPage, page)
         }
     }
 }

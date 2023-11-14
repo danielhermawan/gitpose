@@ -1,7 +1,7 @@
 package com.coco.gitcompose.usecase.di
 
 import com.coco.gitcompose.usecase.DefaultAuthUseCase
-import com.coco.gitcompose.usecase.DefaultGithubUserUserCase
+import com.coco.gitcompose.usecase.DefaultGithubUserUseCase
 import com.coco.gitcompose.usecase.GithubAuthUseCase
 import com.coco.gitcompose.usecase.GithubUserUseCase
 import dagger.Binds
@@ -23,6 +23,6 @@ interface UseCaseModule {
     @Singleton
     @Binds
     fun bindsUserUsecase(
-        userUsecase: DefaultGithubUserUserCase
+        userUsecase: DefaultGithubUserUseCase
     ): GithubUserUseCase
 }
