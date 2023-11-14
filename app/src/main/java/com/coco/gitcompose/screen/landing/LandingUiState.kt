@@ -13,7 +13,8 @@ data class LandingUiState(
     val navItems: ImmutableList<NavItem> = emptyList<NavItem>().toImmutableList(),
     val snackbarState: SnackbarState? = null,
     val profilePictureUrl: String? = null,
-    val selectedTab: LandingNav = LandingNav.HOME
+    val selectedTab: LandingNav = LandingNav.HOME,
+    val elevateTopBar: Boolean = false
 )
 
 enum class LandingNav {

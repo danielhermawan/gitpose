@@ -10,7 +10,7 @@ data class RepoDataModel(
     @Json(name = "full_name") val fullName: String,
     val private: Boolean,
     @Json(name = "html_url") val htmlUrl: String,
-    val description: String = "",
+    val description: String? = null,
     val fork: Boolean = false,
     val language: String? = null,
     @Json(name = "forks_count") val forksCount: Int,

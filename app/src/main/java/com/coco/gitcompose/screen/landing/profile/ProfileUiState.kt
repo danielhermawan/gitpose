@@ -1,8 +1,8 @@
 package com.coco.gitcompose.screen.landing.profile
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.Color
 import com.coco.gitcompose.core.ui.SnackbarState
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 data class ProfileUiState(
@@ -19,12 +19,15 @@ data class ProfileUiState(
 )
 
 data class RecentRepoViewModel(
+    val id: String,
+    val link: String,
     val profilePictureUrl: String,
     val ownerName: String,
     val name: String,
-    val description: String,
+    val description: String?,
     val starCount: Int,
-    val language: String?
+    val language: String?,
+    val color: Color
 )
 
 sealed interface RecentRepoUiState {
@@ -35,7 +38,7 @@ sealed interface RecentRepoUiState {
     ) : RecentRepoUiState
 
     data class Success(
-        val recentRepos: ImmutableList<RecentRepoViewModel> = emptyList<RecentRepoViewModel>().toImmutableList()
+        val recentRepos: List<RecentRepoViewModel> = emptyList<RecentRepoViewModel>().toImmutableList()
     ) : RecentRepoUiState
 
 }

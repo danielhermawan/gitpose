@@ -145,7 +145,7 @@ fun LandingScreen(
             )
         },
         topBar = {
-            LandingAppBar(title = uiState.appBarTitle)
+            LandingAppBar(title = uiState.appBarTitle, showElevation = uiState.elevateTopBar)
         },
         bottomBar = {
             LandingNavigationBar(
@@ -171,6 +171,7 @@ fun LandingScreen(
 @Composable
 fun LandingAppBar(
     modifier: Modifier = Modifier,
+    showElevation: Boolean = false,
     @StringRes title: Int
 ) {
     Surface(
@@ -229,10 +230,9 @@ fun LandingNavigationBar(
                             AsyncImage(
                                 model = profilePictureUrl,
                                 contentDescription = stringResource(id = navItem.label),
-                                placeholder = painterResource(id = R.drawable.ic_person_filled_24),
+                                placeholder = painterResource(id = R.drawable.ic_placeholder_24),
                                 contentScale = ContentScale.Crop,
                                 modifier = imageModifier
-
                             )
                         } else {
                             Icon(

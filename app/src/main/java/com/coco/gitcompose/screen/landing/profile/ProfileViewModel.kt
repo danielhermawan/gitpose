@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.coco.gitcompose.R
 import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.ui.theme.Pink40
 import com.coco.gitcompose.datamodel.CurrentUser
 import com.coco.gitcompose.datamodel.RepoDataModel
 import com.coco.gitcompose.datamodel.RepoSort
@@ -107,12 +108,15 @@ class ProfileViewModel @Inject constructor(
                 recentRepos = RecentRepoUiState.Success(
                     dataModels.map { dataModel ->
                         RecentRepoViewModel(
+                            id = dataModel.id,
+                            link = "${dataModel.owner}/${dataModel.name}",
                             profilePictureUrl = dataModel.owner.avatarUrl,
                             ownerName = dataModel.owner.login,
                             name = dataModel.name,
                             description = dataModel.description,
                             starCount = dataModel.stargazersCount,
-                            language = dataModel.language
+                            language = dataModel.language,
+                            color = Pink40
                         )
                     }.toImmutableList()
                 )
