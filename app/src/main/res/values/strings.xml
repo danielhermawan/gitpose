@@ -34,4 +34,8 @@
     <string name="landing_profile_followers_count">followers</string>
     <string name="landing_profiler_section_popular">Recent Repo</string>
     <string name="landing_repo_empty_description">Empty Description</string>
+    <string name="landing_profile_menu_repositories">Repositories</string>
+    <string name="landing_profile_menu_organization">Organizations</string>
+    <string name="landing_profile_menu_starred">Starred</string>
+    <string name="landing_profile_menu_logout">Logout</string>
 </resources>

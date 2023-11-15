@@ -9,7 +9,6 @@ import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
 import com.coco.gitcompose.core.ui.theme.Pink40
 import com.coco.gitcompose.datamodel.CurrentUser
-import com.coco.gitcompose.datamodel.RepoDataModel
 import com.coco.gitcompose.datamodel.RepoSort
 import com.coco.gitcompose.screen.landing.LandingViewModel
 import com.coco.gitcompose.usecase.DefaultGithubUserUseCase
@@ -35,49 +34,67 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    private var loadedFirstTime: Boolean = false
+
     fun onTabSelected() {
-        viewModelScope.launch {
-            githubUserUseCase.getStreamCurrentUser(true)
-                .catch { ex ->
-                    Log.e(LandingViewModel::class.simpleName, ex.message, ex)
-                    _uiState.update {
-                        it.copy(
-                            snackbarState = SnackbarState(
-                                R.string.landing_error_load_user_data,
-                                MessageType.ERROR
+        if (!loadedFirstTime) {
+            loadedFirstTime = true
+            viewModelScope.launch {
+                githubUserUseCase.getStreamCurrentUser(true)
+                    .catch { ex ->
+                        Log.e(LandingViewModel::class.simpleName, ex.message, ex)
+                        _uiState.update {
+                            it.copy(
+                                snackbarState = SnackbarState(
+                                    R.string.landing_error_load_user_data,
+                                    MessageType.ERROR
+                                )
                             )
-                        )
+                        }
                     }
-                }
-                .onEach { currentUser ->
-                    updateCurrentUserData(currentUser)
-                }
-                .launchIn(this)
+                    .onEach { currentUser ->
+                        updateCurrentUserData(currentUser)
+                    }
+                    .launchIn(this)
+                loadRecentRepo()
+            }
+        }
+    }
+
+    fun refresh() {
+        if (_uiState.value.recentRepos is RecentRepoUiState.Loading) {
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isRefreshing = true
+                )
+            }
+
+            val currentUserJob = launch { githubUserUseCase.refreshCurrentUser() }
+            val recentRepoJob = launch { loadRecentRepo(false) }
 
             try {
-                _uiState.update {
-                    it.copy(
-                        recentRepos = RecentRepoUiState.Loading
-                    )
-                }
-                val recentRepos = githubUserUseCase.getRemoteCurrentUserRepository(
-                    sort = RepoSort.pushed, perPage = 10
-                )
-                updateRecentRepo(recentRepos)
+                currentUserJob.join()
             } catch (ex: Exception) {
-                Log.e(LandingViewModel::class.simpleName, ex.message, ex)
                 _uiState.update {
                     it.copy(
                         snackbarState = SnackbarState(
-                            R.string.landing_error_load_repo_data,
+                            R.string.landing_error_load_user_data,
                             MessageType.ERROR
-                        ),
-                        recentRepos = RecentRepoUiState.Error()
+                        )
                     )
                 }
             }
+            recentRepoJob.join()
 
-
+            _uiState.update {
+                it.copy(
+                    isRefreshing = false
+                )
+            }
         }
     }
 
@@ -102,25 +119,49 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun updateRecentRepo(dataModels: List<RepoDataModel>) {
-        _uiState.update {
-            it.copy(
-                recentRepos = RecentRepoUiState.Success(
-                    dataModels.map { dataModel ->
-                        RecentRepoViewModel(
-                            id = dataModel.id,
-                            link = "${dataModel.owner}/${dataModel.name}",
-                            profilePictureUrl = dataModel.owner.avatarUrl,
-                            ownerName = dataModel.owner.login,
-                            name = dataModel.name,
-                            description = dataModel.description,
-                            starCount = dataModel.stargazersCount,
-                            language = dataModel.language,
-                            color = Pink40
-                        )
-                    }.toImmutableList()
-                )
+    private suspend fun loadRecentRepo(needLoading: Boolean = true) {
+        try {
+            if (needLoading || _uiState.value.recentRepos is RecentRepoUiState.Error) {
+                _uiState.update {
+                    it.copy(
+                        recentRepos = RecentRepoUiState.Loading
+                    )
+                }
+            }
+
+            val recentRepos = githubUserUseCase.getRemoteCurrentUserRepository(
+                sort = RepoSort.pushed, perPage = 10
             )
+            _uiState.update {
+                it.copy(
+                    recentRepos = RecentRepoUiState.Success(
+                        recentRepos.map { dataModel ->
+                            RecentRepoViewModel(
+                                id = dataModel.id,
+                                link = "${dataModel.owner}/${dataModel.name}",
+                                profilePictureUrl = dataModel.owner.avatarUrl,
+                                ownerName = dataModel.owner.login,
+                                name = dataModel.name,
+                                description = dataModel.description,
+                                starCount = dataModel.stargazersCount,
+                                language = dataModel.language,
+                                color = Pink40
+                            )
+                        }.toImmutableList()
+                    )
+                )
+            }
+        } catch (ex: Exception) {
+            Log.e(LandingViewModel::class.simpleName, ex.message, ex)
+            _uiState.update {
+                it.copy(
+                    snackbarState = SnackbarState(
+                        R.string.landing_error_load_repo_data,
+                        MessageType.ERROR
+                    ),
+                    recentRepos = RecentRepoUiState.Error()
+                )
+            }
         }
     }
 

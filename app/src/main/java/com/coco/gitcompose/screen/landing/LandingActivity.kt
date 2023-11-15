@@ -24,14 +24,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -47,7 +46,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -145,13 +143,17 @@ fun LandingScreen(
             )
         },
         topBar = {
-            LandingAppBar(title = uiState.appBarTitle, showElevation = uiState.elevateTopBar)
+            LandingAppBar(
+                title = uiState.appBarTitle,
+                showElevation = uiState.elevateTopBar,
+                selectedNav = uiState.selectedTab
+            )
         },
         bottomBar = {
             LandingNavigationBar(
                 navItems = uiState.navItems,
                 profilePictureUrl = uiState.profilePictureUrl,
-                onBottomTabClick = onBottomTabClick
+                onBottomTabClick = onBottomTabClick,
             )
         },
         modifier = modifier
@@ -172,11 +174,12 @@ fun LandingScreen(
 fun LandingAppBar(
     modifier: Modifier = Modifier,
     showElevation: Boolean = false,
+    selectedNav: LandingNav = LandingNav.HOME,
     @StringRes title: Int
 ) {
     Surface(
         modifier = modifier,
-        shadowElevation = 8.dp
+        shadowElevation = if (showElevation) 8.dp else 0.dp
     ) {
         TopAppBar(
             title = {
@@ -188,7 +191,18 @@ fun LandingAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            ),
+            actions = {
+                if (selectedNav == LandingNav.PROFILE) {
+                    IconButton(onClick = { /* todo: Implement share */ }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_share_24),
+                            contentDescription = "Share Action",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+            }
         )
     }
 }
@@ -295,3 +309,5 @@ fun Login() {
 //todo: standarized color
 //todo: Clean up module
 //todo: create good navigation
+//todo: viewpager, drawer, tablayout
+//todo: unit and ui test

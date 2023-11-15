@@ -15,6 +15,7 @@ data class ProfileUiState(
     val totalRepo: Int = 0,
     val totalOrganizations: Int = 0,
     val totalStar: Int = 0,
+    val isRefreshing: Boolean = false,
     val recentRepos: RecentRepoUiState = RecentRepoUiState.Success()
 )
 

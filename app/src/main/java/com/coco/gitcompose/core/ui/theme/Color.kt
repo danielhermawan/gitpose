@@ -31,6 +31,7 @@ val Black40 = Color(0XFF1C1B1F)
 
 val White80 = Color(0xFFFFFFFF)
 val Grey30 = Color(0xFFe0e0e0)
+val Grey20 = Color(0xFFEEEEEE)
 val Grey70 = Color(0XFF616161)
 val Grey10 = Color(0XFFeeeeee)
 
@@ -41,3 +42,7 @@ val Blue70 = Color(0XFF2962ff)
 val Green50 = Color(0XFF4CAF50)
 
 val Yellow70 = Color(0XFFFBC02D)
+
+val Red50 = Color(0XFFF44336)
+
+val Orange40 = Color(0XFFFFA726)
