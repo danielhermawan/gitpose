@@ -1,6 +1,6 @@
-package com.coco.gitcompose.core.network
+package com.coco.gitcompose.core.remote
 
-import com.coco.gitcompose.datamodel.AccessTokenAppResponse
+import com.coco.gitcompose.core.datamodel.AccessTokenAppResponse
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query

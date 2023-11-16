@@ -1,4 +1,4 @@
-package com.coco.gitcompose.core
+package com.coco.gitcompose.core.util
 
 import android.content.Context
 import android.net.Uri

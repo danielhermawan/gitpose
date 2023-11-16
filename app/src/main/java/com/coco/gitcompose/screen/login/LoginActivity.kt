@@ -42,11 +42,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coco.gitcompose.R
-import com.coco.gitcompose.core.goToGithubPrivacyPage
-import com.coco.gitcompose.core.goToGithubTermPage
-import com.coco.gitcompose.core.openChromeTab
 import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
+import com.coco.gitcompose.core.util.goToGithubPrivacyPage
+import com.coco.gitcompose.core.util.goToGithubTermPage
+import com.coco.gitcompose.core.util.openChromeTab
 import com.coco.gitcompose.screen.landing.LandingActivity
 import dagger.hilt.android.AndroidEntryPoint
 

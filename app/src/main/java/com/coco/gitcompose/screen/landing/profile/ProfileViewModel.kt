@@ -5,17 +5,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coco.gitcompose.R
+import com.coco.gitcompose.core.common.getMutableStateFlow
+import com.coco.gitcompose.core.datamodel.RepoSort
 import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
-import com.coco.gitcompose.core.ui.theme.Pink40
 import com.coco.gitcompose.datamodel.CurrentUser
-import com.coco.gitcompose.datamodel.RepoSort
 import com.coco.gitcompose.screen.landing.LandingViewModel
-import com.coco.gitcompose.usecase.DefaultGithubUserUseCase
 import com.coco.gitcompose.usecase.GithubAuthUseCase
+import com.coco.gitcompose.usecase.GithubRepositoryUseCase
+import com.coco.gitcompose.usecase.GithubUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -29,9 +29,10 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val githubAuthUseCase: GithubAuthUseCase,
-    private val githubUserUseCase: DefaultGithubUserUseCase
+    private val githubUserUseCase: GithubUserUseCase,
+    private val githubRepositoryUseCase: GithubRepositoryUseCase
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ProfileUiState())
+    private val _uiState = savedStateHandle.getMutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     private var loadedFirstTime: Boolean = false
@@ -58,6 +59,12 @@ class ProfileViewModel @Inject constructor(
                     .launchIn(this)
                 loadRecentRepo()
             }
+        }
+    }
+
+    fun onSnackbarMessageShown() {
+        _uiState.update {
+            it.copy(snackbarState = null)
         }
     }
 
@@ -129,8 +136,8 @@ class ProfileViewModel @Inject constructor(
                 }
             }
 
-            val recentRepos = githubUserUseCase.getRemoteCurrentUserRepository(
-                sort = RepoSort.pushed, perPage = 10
+            val recentRepos = githubRepositoryUseCase.getRemoteCurrentUserRepository(
+                sort = RepoSort.PUSHED, perPage = 10
             )
             _uiState.update {
                 it.copy(
@@ -145,7 +152,7 @@ class ProfileViewModel @Inject constructor(
                                 description = dataModel.description,
                                 starCount = dataModel.stargazersCount,
                                 language = dataModel.language,
-                                color = Pink40
+                                color = 0xFF7D5260
                             )
                         }.toImmutableList()
                     )

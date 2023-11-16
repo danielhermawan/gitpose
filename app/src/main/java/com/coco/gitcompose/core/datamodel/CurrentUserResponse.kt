@@ -1,4 +1,4 @@
-package com.coco.gitcompose.datamodel
+package com.coco.gitcompose.core.datamodel
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

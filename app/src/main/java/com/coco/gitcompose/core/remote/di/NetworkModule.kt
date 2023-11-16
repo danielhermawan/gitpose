@@ -1,9 +1,9 @@
-package com.coco.gitcompose.core.network.di
+package com.coco.gitcompose.core.remote.di
 
 import com.coco.gitcompose.BuildConfig
-import com.coco.gitcompose.core.network.GithubAuthService
-import com.coco.gitcompose.core.network.GithubService
-import com.coco.gitcompose.core.network.GithubTokenInterceptor
+import com.coco.gitcompose.core.remote.GithubAuthService
+import com.coco.gitcompose.core.remote.GithubService
+import com.coco.gitcompose.core.remote.GithubTokenInterceptor
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides

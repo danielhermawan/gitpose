@@ -1,5 +1,6 @@
 package com.coco.gitcompose.core.ui
 
+import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
@@ -14,15 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.coco.gitcompose.core.ui.theme.Green50
+import kotlinx.parcelize.Parcelize
 
 enum class MessageType {
     SUCCESS, INFO, ERROR
 }
 
+@Parcelize
 data class SnackbarState(
     @StringRes val message: Int,
     val messageType: MessageType = MessageType.INFO
-)
+) : Parcelable
 
 class GitposeSnackbarVisuals(
     override val message: String,
@@ -34,13 +37,29 @@ class GitposeSnackbarVisuals(
 ) : SnackbarVisuals
 
 @Composable
+fun SnackbarHostState.handleSnackbarState(
+    snackbarStateState: SnackbarState?,
+    onSnackbarMessageShown: () -> Unit = {}
+) {
+    snackbarStateState?.let { snackBarMessage ->
+        val snackbarText = stringResource(snackBarMessage.message)
+        LaunchedEffect(snackBarMessage) {
+            showSnackbar(
+                GitposeSnackbarVisuals(
+                    message = snackbarText, messageType = snackBarMessage.messageType
+                )
+            )
+            onSnackbarMessageShown()
+        }
+    }
+}
+
+@Composable
 fun GitposeSnackbarHost(
     modifier: Modifier = Modifier,
-    snackbarStateState: SnackbarState? = null,
     hostState: SnackbarHostState = remember {
         SnackbarHostState()
-    },
-    onSnackbarMessageShown: () -> Unit = {}
+    }
 ) {
     SnackbarHost(hostState = hostState, modifier = modifier) { data ->
         val visual = (data.visuals as? GitposeSnackbarVisuals)
@@ -51,15 +70,5 @@ fun GitposeSnackbarHost(
             else -> MaterialTheme.colorScheme.inverseSurface
         }
         Snackbar(snackbarData = data, containerColor = containerColor)
-    }
-
-    snackbarStateState?.let { snackBarMessage ->
-        val snackbarText = stringResource(snackBarMessage.message)
-        LaunchedEffect(snackBarMessage) {
-            hostState.showSnackbar(GitposeSnackbarVisuals(
-                message = snackbarText, messageType = snackBarMessage.messageType
-            ))
-            onSnackbarMessageShown()
-        }
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coco.gitcompose.R
+import com.coco.gitcompose.core.common.getMutableStateFlow
 import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
 import com.coco.gitcompose.datamodel.CurrentUser
@@ -12,16 +13,16 @@ import com.coco.gitcompose.usecase.GithubAuthUseCase
 import com.coco.gitcompose.usecase.GithubUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+
+private const val SELECTED_TAB_KEY = "SELECTED_TAB_KEY"
 
 @HiltViewModel
 class LandingViewModel @Inject constructor(
@@ -29,8 +30,7 @@ class LandingViewModel @Inject constructor(
     private val githubAuthUseCase: GithubAuthUseCase,
     private val githubUserUserCase: GithubUserUseCase,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(LandingUiState())
+    private val _uiState = savedStateHandle.getMutableStateFlow(LandingUiState())
     val uiState: StateFlow<LandingUiState> = _uiState.asStateFlow()
 
     init {
@@ -44,12 +44,7 @@ class LandingViewModel @Inject constructor(
             }
 
             if (isLogin) {
-                _uiState.update {
-                    it.copy(
-                        navItems = getLandingNavItems().toImmutableList(),
-                        appBarTitle = getAppBarTitle()
-                    )
-                }
+                changeActiveTab(_uiState.value.selectedTab)
                 githubUserUserCase.getStreamCurrentUser(true)
                     .catch { ex ->
                         Log.e(LandingViewModel::class.simpleName, ex.message, ex)
@@ -69,22 +64,14 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun onSnackbarEvent(snackbarState: SnackbarState?) {
-        _uiState.update {
-            it.copy(snackbarState = snackbarState)
-        }
-    }
-
     fun onSnackbarMessageShown() {
         _uiState.update {
             it.copy(snackbarState = null)
         }
     }
 
-    fun onNavigationItemClick(selectedNav: LandingNav) {
-        val navItems = _uiState.value.navItems.map { navItem ->
-            navItem.copy(selected = selectedNav == navItem.id)
-        }.toImmutableList()
+    fun changeActiveTab(selectedNav: LandingNav) {
+        val navItems = getLandingNavItems(selectedNav).toImmutableList()
         _uiState.update {
             it.copy(
                 navItems = navItems,

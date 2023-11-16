@@ -25,6 +25,7 @@ plugins {
     alias(libs.plugins.hilt.gradle)
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 val apiKeyProperty = Properties()

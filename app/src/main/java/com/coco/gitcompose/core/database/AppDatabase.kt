@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package com.coco.gitcompose.testdi
+package com.coco.gitcompose.core.database
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.components.SingletonComponent
-import dagger.hilt.testing.TestInstallIn
-import com.coco.gitcompose.data.GitRepositoryRepository
-import com.coco.gitcompose.data.di.DataModule
-import com.coco.gitcompose.data.di.FakeGitRepositoryRepository
+import androidx.room.Database
+import androidx.room.RoomDatabase
 
-@Module
-@TestInstallIn(
-    components = [SingletonComponent::class],
-    replaces = [DataModule::class]
-)
-interface FakeDataModule {
+@Database(entities = [UserRepositoryEntity::class], version = 1)
+abstract class AppDatabase : RoomDatabase() {
 
-    @Binds
-    abstract fun bindRepository(
-        fakeRepository: FakeGitRepositoryRepository
-    ): GitRepositoryRepository
+    abstract fun userRepositoryDao(): UserRepositoryDao
 }

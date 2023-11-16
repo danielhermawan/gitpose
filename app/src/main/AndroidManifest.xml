@@ -43,6 +43,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".screen.userRepository.UserRepositoryActivity"
+            android:exported="true"
+            android:label="@string/title_activity_login"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Gitpose">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".screen.landing.LandingActivity" />
+        </activity>
     </application>
 
 </manifest>

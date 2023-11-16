@@ -3,10 +3,8 @@ package com.coco.gitcompose.usecase
 import androidx.datastore.core.DataStore
 import com.coco.gitcompose.core.common.Dispatcher
 import com.coco.gitcompose.core.common.GitposeDispatchers
-import com.coco.gitcompose.core.network.GithubService
+import com.coco.gitcompose.core.remote.GithubService
 import com.coco.gitcompose.datamodel.CurrentUser
-import com.coco.gitcompose.datamodel.RepoDataModel
-import com.coco.gitcompose.datamodel.RepoSort
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +21,6 @@ interface GithubUserUseCase {
     suspend fun getRemoteCurrentUser(): CurrentUser
 
     fun getStreamCurrentUser(refresh: Boolean): Flow<CurrentUser>
-
-    suspend fun getRemoteCurrentUserRepository(
-        sort: RepoSort = RepoSort.full_name, perPage: Int = 30, page: Int = 1
-    ): List<RepoDataModel>
 
     suspend fun refreshCurrentUser()
 }
@@ -82,15 +76,5 @@ class DefaultGithubUserUseCase @Inject constructor(
                 refreshCurrentUser()
             }
         }.filterNotNull()
-    }
-
-    override suspend fun getRemoteCurrentUserRepository(
-        sort: RepoSort,
-        perPage: Int,
-        page: Int
-    ): List<RepoDataModel> {
-        return withContext(ioDispatcher) {
-            githubService.getCurrentUserRepos(sort, perPage, page)
-        }
     }
 }

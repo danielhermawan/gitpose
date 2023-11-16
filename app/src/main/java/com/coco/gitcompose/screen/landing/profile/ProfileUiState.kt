@@ -1,10 +1,14 @@
 package com.coco.gitcompose.screen.landing.profile
 
+import android.os.Parcelable
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Stable
 import com.coco.gitcompose.core.ui.SnackbarState
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
+@Stable
 data class ProfileUiState(
     val snackbarState: SnackbarState? = null,
     val logoutSuccess: Boolean = false,
@@ -17,8 +21,9 @@ data class ProfileUiState(
     val totalStar: Int = 0,
     val isRefreshing: Boolean = false,
     val recentRepos: RecentRepoUiState = RecentRepoUiState.Success()
-)
+) : Parcelable
 
+@Parcelize
 data class RecentRepoViewModel(
     val id: String,
     val link: String,
@@ -28,18 +33,21 @@ data class RecentRepoViewModel(
     val description: String?,
     val starCount: Int,
     val language: String?,
-    val color: Color
-)
+    val color: Long
+) : Parcelable
 
-sealed interface RecentRepoUiState {
+@Parcelize
+sealed interface RecentRepoUiState : Parcelable {
+    @Parcelize
     data object Loading : RecentRepoUiState
 
+    @Parcelize
     data class Error(
         @StringRes val messageError: Int? = null
     ) : RecentRepoUiState
 
+    @Parcelize
     data class Success(
         val recentRepos: List<RecentRepoViewModel> = emptyList<RecentRepoViewModel>().toImmutableList()
     ) : RecentRepoUiState
-
 }

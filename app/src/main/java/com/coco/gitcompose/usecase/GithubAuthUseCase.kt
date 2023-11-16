@@ -1,18 +1,12 @@
 package com.coco.gitcompose.usecase
 
 import androidx.datastore.core.DataStore
-import com.coco.gitcompose.core.common.Dispatcher
-import com.coco.gitcompose.core.common.GitposeDispatchers
-import com.coco.gitcompose.core.generateGithubAuthUrl
-import com.coco.gitcompose.core.network.GithubService
-import com.coco.gitcompose.core.network.SessionTokenManager
+import com.coco.gitcompose.core.remote.SessionTokenManager
+import com.coco.gitcompose.core.util.generateGithubAuthUrl
 import com.coco.gitcompose.data.GithubToken
 import com.coco.gitcompose.datamodel.CurrentUser
-import com.coco.gitcompose.datamodel.CurrentUserResponse
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 

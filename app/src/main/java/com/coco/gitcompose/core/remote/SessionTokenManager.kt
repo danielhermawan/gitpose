@@ -1,12 +1,12 @@
-package com.coco.gitcompose.core.network
+package com.coco.gitcompose.core.remote
 
 import androidx.datastore.core.DataStore
 import com.coco.gitcompose.BuildConfig
 import com.coco.gitcompose.core.common.Dispatcher
 import com.coco.gitcompose.core.common.GitposeDispatchers
+import com.coco.gitcompose.core.datamodel.AccessTokenAppResponse
+import com.coco.gitcompose.core.datamodel.GithubOauthInfo
 import com.coco.gitcompose.data.GithubToken
-import com.coco.gitcompose.datamodel.AccessTokenAppResponse
-import com.coco.gitcompose.datamodel.GithubOauthInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

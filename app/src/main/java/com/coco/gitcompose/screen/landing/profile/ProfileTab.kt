@@ -37,11 +37,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -60,7 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.coco.gitcompose.R
-import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.ui.handleSnackbarState
 import com.coco.gitcompose.core.ui.shimmeringLoadingAnimation
 import com.coco.gitcompose.core.ui.theme.Black40
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
@@ -76,9 +78,9 @@ import com.coco.gitcompose.screen.landing.LandingNav
 fun ProfileTab(
     modifier: Modifier = Modifier,
     selectedTab: LandingNav = LandingNav.PROFILE,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     viewModel: ProfileViewModel = hiltViewModel(),
-    onLogoutSuccess: () -> Unit = {},
-    onSnackbarEvent: (SnackbarState?) -> Unit = {}
+    onLogoutSuccess: () -> Unit = {}
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -86,6 +88,11 @@ fun ProfileTab(
     if (selectedTab == LandingNav.PROFILE) {
         val pullRefreshState =
             rememberPullRefreshState(uiState.isRefreshing, { viewModel.refresh() })
+
+        snackbarHostState.handleSnackbarState(
+            snackbarStateState = uiState.snackbarState,
+            onSnackbarMessageShown = { viewModel.onSnackbarMessageShown() }
+        )
 
         ProfileScreen(
             modifier = modifier,
@@ -107,10 +114,6 @@ fun ProfileTab(
                 //todo: navigate to user starred re[p
             }
         )
-
-        LaunchedEffect(uiState.snackbarState) {
-            onSnackbarEvent(uiState.snackbarState)
-        }
 
         LaunchedEffect(uiState.logoutSuccess) {
             if (uiState.logoutSuccess) {

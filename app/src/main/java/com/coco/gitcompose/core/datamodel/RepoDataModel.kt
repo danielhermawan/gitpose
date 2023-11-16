@@ -1,4 +1,4 @@
-package com.coco.gitcompose.datamodel
+package com.coco.gitcompose.core.datamodel
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -24,12 +24,19 @@ data class RepoDataModel(
     val owner: RepoOwnerDataModel,
     @Json(name = "created_at") val createdAt: String,
     @Json(name = "updated_at") val updatedAt: String,
-    @Json(name = "pushed_at") val pushedAt: String
+    @Json(name = "pushed_at") val pushedAt: String,
+    val parent: RepoParentDataModel? = null
 )
 
 @JsonClass(generateAdapter = true)
 data class RepoOwnerDataModel(
     val login: String,
-    val id: Int,
     @Json(name = "avatar_url") val avatarUrl: String,
 )
+
+
+@JsonClass(generateAdapter = true)
+data class RepoParentDataModel(
+    @Json(name = "full_name") val fullName: String
+)
+

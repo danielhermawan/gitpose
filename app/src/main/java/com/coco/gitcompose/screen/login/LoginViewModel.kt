@@ -5,9 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coco.gitcompose.R
+import com.coco.gitcompose.core.common.getMutableStateFlow
 import com.coco.gitcompose.usecase.GithubAuthUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,7 +22,7 @@ class LoginViewModel @Inject constructor(
 ): ViewModel() {
     private var githubState: String? = null
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = savedStateHandle.getMutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun loginGithub() {

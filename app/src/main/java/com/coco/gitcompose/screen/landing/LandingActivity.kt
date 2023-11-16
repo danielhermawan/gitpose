@@ -59,13 +59,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.coco.gitcompose.R
 import com.coco.gitcompose.core.ui.GitposeSnackbarHost
-import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.ui.handleSnackbarState
 import com.coco.gitcompose.core.ui.theme.Blue90
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import com.coco.gitcompose.screen.landing.profile.ProfileTab
 import com.coco.gitcompose.screen.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @AndroidEntryPoint
@@ -89,20 +88,19 @@ class LandingActivity : ComponentActivity() {
                 ) {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+                    val snackbarHostState = remember {
+                        SnackbarHostState()
+                    }
+
                     LandingScreen(
                         uiState = uiState,
+                        snackbarHostState = snackbarHostState,
                         onLogoutSuccess = {
                             navigateToLogin()
                         },
                         onBottomTabClick = { landingNav ->
-                            viewModel.onNavigationItemClick(landingNav)
+                            viewModel.changeActiveTab(landingNav)
                         },
-                        onSnackbarEvent = { snackbarState ->
-                            viewModel.onSnackbarEvent(snackbarState)
-                        },
-                        onSnackbarShown = {
-                            viewModel.onSnackbarMessageShown()
-                        }
                     )
 
                     LaunchedEffect(uiState.isLogin) {
@@ -111,6 +109,10 @@ class LandingActivity : ComponentActivity() {
                         }
                     }
 
+                    snackbarHostState.handleSnackbarState(
+                        snackbarStateState = uiState.snackbarState,
+                        onSnackbarMessageShown = { viewModel.onSnackbarMessageShown() }
+                    )
                 }
             }
         }
@@ -131,15 +133,11 @@ fun LandingScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onLogoutSuccess: () -> Unit = {},
     onBottomTabClick: (LandingNav) -> Unit = {},
-    onSnackbarEvent: (SnackbarState?) -> Unit = {},
-    onSnackbarShown: () -> Unit = {}
 ) {
     Scaffold(
         snackbarHost = {
             GitposeSnackbarHost(
-                hostState = snackbarHostState,
-                snackbarStateState = uiState.snackbarState,
-                onSnackbarMessageShown = onSnackbarShown
+                hostState = snackbarHostState
             )
         },
         topBar = {
@@ -162,8 +160,8 @@ fun LandingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
+            snackbarHostState = snackbarHostState,
             onLogoutSuccess = onLogoutSuccess,
-            onSnackbarEvent = onSnackbarEvent,
             selectedTab = uiState.selectedTab
         )
     }
@@ -210,7 +208,7 @@ fun LandingAppBar(
 @Composable
 fun LandingNavigationBar(
     modifier: Modifier = Modifier,
-    navItems: ImmutableList<NavItem> = emptyList<NavItem>().toImmutableList(),
+    navItems: List<NavItem> = emptyList<NavItem>().toImmutableList(),
     profilePictureUrl: String? = null,
     onBottomTabClick: (LandingNav) -> Unit = {}
 ) {

@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package com.coco.gitcompose.data.di
+package com.coco.gitcompose.core.database.di
 
-import dagger.Binds
+import android.content.Context
+import androidx.room.Room
+import com.coco.gitcompose.core.database.AppDatabase
+import com.coco.gitcompose.core.database.UserRepositoryDao
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import com.coco.gitcompose.data.GitRepositoryRepository
-import com.coco.gitcompose.data.DefaultGitRepositoryRepository
-import javax.inject.Inject
 import javax.inject.Singleton
+
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface DataModule {
+class DatabaseModule {
+    @Provides
+    fun provideUserRepositoryDao(appDatabase: AppDatabase): UserRepositoryDao {
+        return appDatabase.userRepositoryDao()
+    }
 
+    @Provides
     @Singleton
-    @Binds
-    fun bindsGitRepositoryRepository(
-        gitRepositoryRepository: DefaultGitRepositoryRepository
-    ): GitRepositoryRepository
-}
-
-class FakeGitRepositoryRepository @Inject constructor() : GitRepositoryRepository {
-    override val gitRepositorys: Flow<List<String>> = flowOf(fakeGitRepositorys)
-
-    override suspend fun add(name: String) {
-        throw NotImplementedError()
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "gitpose"
+        ).build()
     }
 }
-
-val fakeGitRepositorys = listOf("One", "Two", "Three")

@@ -1,4 +1,4 @@
-package com.coco.gitcompose.datamodel
+package com.coco.gitcompose.core.datamodel
 
 data class GithubOauthInfo (
     val clientId: String,

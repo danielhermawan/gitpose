@@ -1,12 +1,8 @@
-package com.coco.gitcompose.core.network
+package com.coco.gitcompose.core.remote
 
-import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.datastore.core.DataStore
 import com.coco.gitcompose.data.GithubToken
-import com.coco.gitcompose.screen.login.LoginActivity
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
