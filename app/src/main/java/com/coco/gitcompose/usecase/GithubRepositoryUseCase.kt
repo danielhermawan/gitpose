@@ -8,10 +8,12 @@ import com.coco.gitcompose.core.datamodel.RepoDataModel
 import com.coco.gitcompose.core.datamodel.RepoOwnerDataModel
 import com.coco.gitcompose.core.datamodel.RepoParentDataModel
 import com.coco.gitcompose.core.datamodel.RepoSort
+import com.coco.gitcompose.core.datamodel.RepoType
 import com.coco.gitcompose.core.datamodel.SortBy
 import com.coco.gitcompose.core.remote.GithubService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -23,14 +25,22 @@ interface GithubRepositoryUseCase {
 
     fun getStreamCurrentUserRepository(
         sort: RepoSort = RepoSort.FULL_NAME,
-        sortBy: SortBy = SortBy.DESC
+        sortBy: SortBy = SortBy.DESC,
+        filterBy: RepoType = RepoType.ALL,
     ): Flow<List<RepoDataModel>>
+
+    suspend fun getLocalCurrentUserRepository(
+        sort: RepoSort = RepoSort.FULL_NAME,
+        sortBy: SortBy = SortBy.DESC,
+        filterBy: RepoType = RepoType.ALL,
+    ): List<RepoDataModel>
 
     suspend fun getRemoteCurrentUserRepository(
         sort: RepoSort = RepoSort.FULL_NAME,
         perPage: Int = 30,
         page: Int = 1,
         sortBy: SortBy = SortBy.DESC,
+        filterBy: RepoType = RepoType.ALL,
         savedInCache: Boolean = false,
         replaceCache: Boolean = true
     ): List<RepoDataModel>
@@ -43,7 +53,8 @@ class DefaultGithubRepositoryUseCase @Inject constructor(
 ) : GithubRepositoryUseCase {
     override fun getStreamCurrentUserRepository(
         sort: RepoSort,
-        sortBy: SortBy
+        sortBy: SortBy,
+        filterBy: RepoType
     ): Flow<List<RepoDataModel>> {
         val userRepositories =
             if (sortBy == SortBy.DESC) userRepositoryDao.getUserRepositoriesDesc(sort.sortName) else userRepositoryDao.getUserRepositoriesAsc(
@@ -56,11 +67,26 @@ class DefaultGithubRepositoryUseCase @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
+    override suspend fun getLocalCurrentUserRepository(
+        sort: RepoSort,
+        sortBy: SortBy,
+        filterBy: RepoType
+    ): List<RepoDataModel> {
+        return withContext(ioDispatcher) {
+            getStreamCurrentUserRepository(
+                sort = sort,
+                sortBy = sortBy,
+                filterBy = filterBy
+            ).first()
+        }
+    }
+
     override suspend fun getRemoteCurrentUserRepository(
         sort: RepoSort,
         perPage: Int,
         page: Int,
         sortBy: SortBy,
+        filterBy: RepoType,
         savedInCache: Boolean,
         replaceCache: Boolean
     ): List<RepoDataModel> {
