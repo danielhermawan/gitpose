@@ -6,6 +6,7 @@ import com.coco.gitcompose.core.datamodel.RepoSort
 import com.coco.gitcompose.core.datamodel.RepoType
 import com.coco.gitcompose.core.datamodel.SortBy
 import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.util.RgbColor
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.parcelize.Parcelize
 
@@ -33,7 +34,7 @@ data class OwnerRepoViewModel(
     val description: String?,
     val starCount: Int,
     val language: String?,
-    val color: Long
+    val color: RgbColor?
 ) : Parcelable
 
 @Parcelize

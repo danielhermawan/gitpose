@@ -9,6 +9,7 @@ import com.coco.gitcompose.core.common.getMutableStateFlow
 import com.coco.gitcompose.core.datamodel.RepoSort
 import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.util.languageToColor
 import com.coco.gitcompose.datamodel.CurrentUser
 import com.coco.gitcompose.screen.landing.LandingViewModel
 import com.coco.gitcompose.usecase.GithubAuthUseCase
@@ -152,7 +153,7 @@ class ProfileViewModel @Inject constructor(
                                 description = dataModel.description,
                                 starCount = dataModel.stargazersCount,
                                 language = dataModel.language,
-                                color = 0xFF7D5260
+                                color = dataModel.language?.languageToColor()
                             )
                         }.toImmutableList()
                     )

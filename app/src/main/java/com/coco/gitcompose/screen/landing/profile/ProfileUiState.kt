@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Stable
 import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.util.RgbColor
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.parcelize.Parcelize
 
@@ -33,7 +34,7 @@ data class RecentRepoViewModel(
     val description: String?,
     val starCount: Int,
     val language: String?,
-    val color: Long
+    val color: RgbColor?
 ) : Parcelable
 
 @Parcelize

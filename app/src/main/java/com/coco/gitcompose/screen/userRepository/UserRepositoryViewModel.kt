@@ -12,6 +12,7 @@ import com.coco.gitcompose.core.datamodel.RepoType
 import com.coco.gitcompose.core.datamodel.SortBy
 import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
+import com.coco.gitcompose.core.util.languageToColor
 import com.coco.gitcompose.usecase.GithubRepositoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -216,7 +217,7 @@ class UserRepositoryViewModel @Inject constructor(
             description = repo.description,
             starCount = repo.stargazersCount,
             language = repo.language,
-            color = 0xFF7D5260
+            color = repo.language?.languageToColor()
         )
     }
 }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coco.gitcompose.R
@@ -106,15 +107,31 @@ fun UserRepositoryAppBar(
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = ownerName,
-                fontWeight = FontWeight.Bold
-            )
+            Column {
+                Text(
+                    text = ownerName,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Repositories",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
         },
+
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
+        navigationIcon = {
+            IconButton(onClick = { /* todo: Implement search */ }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back_24),
+                    contentDescription = "Back Action",
+                )
+            }
+        },
         actions = {
             IconButton(onClick = { /* todo: Implement search */ }) {
                 Icon(
@@ -126,4 +143,21 @@ fun UserRepositoryAppBar(
         },
         modifier = Modifier
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Login() {
+    GitposeTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            UserRepositoryScreen(
+                uiState = UserRepositoryUiState(
+                    loginName = "danielhermawan"
+                )
+            )
+        }
+    }
 }

@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -71,7 +72,10 @@ import com.coco.gitcompose.core.ui.theme.Pink40
 import com.coco.gitcompose.core.ui.theme.Red50
 import com.coco.gitcompose.core.ui.theme.White80
 import com.coco.gitcompose.core.ui.theme.Yellow70
+import com.coco.gitcompose.core.util.RgbColor
+import com.coco.gitcompose.core.util.toColor
 import com.coco.gitcompose.screen.landing.LandingNav
+import com.coco.gitcompose.screen.userRepository.UserRepositoryActivity
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -89,10 +93,7 @@ fun ProfileTab(
         val pullRefreshState =
             rememberPullRefreshState(uiState.isRefreshing, { viewModel.refresh() })
 
-        snackbarHostState.handleSnackbarState(
-            snackbarStateState = uiState.snackbarState,
-            onSnackbarMessageShown = { viewModel.onSnackbarMessageShown() }
-        )
+        val context = LocalContext.current
 
         ProfileScreen(
             modifier = modifier,
@@ -105,7 +106,7 @@ fun ProfileTab(
                 //todo: navigate to repo detail
             },
             onRepoMenuCLick = {
-                //todo: navigate to user repo list
+                context.startActivity(UserRepositoryActivity.getIntent(context))
             },
             onOrganizationClick = {
 
@@ -113,6 +114,11 @@ fun ProfileTab(
             onStarredClick = {
                 //todo: navigate to user starred re[p
             }
+        )
+
+        snackbarHostState.handleSnackbarState(
+            snackbarStateState = uiState.snackbarState,
+            onSnackbarMessageShown = { viewModel.onSnackbarMessageShown() }
         )
 
         LaunchedEffect(uiState.logoutSuccess) {
@@ -324,7 +330,8 @@ fun RepoSection(
                             starCount = repo.starCount,
                             language = repo.language,
                             link = repo.link,
-                            onRepoCLick = onRepoCLick
+                            onRepoCLick = onRepoCLick,
+                            rgbColor = repo.color
                         )
                     }
                 }
@@ -460,6 +467,7 @@ fun RepoCard(
     repoDescription: String? = null,
     starCount: Int = 0,
     language: String? = null,
+    rgbColor: RgbColor? = null,
     onRepoCLick: (String) -> Unit = {}
 ) {
     OutlinedCard(
@@ -538,7 +546,7 @@ fun RepoCard(
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .size(12.dp)
-                            .background(Pink40, CircleShape)
+                            .background(rgbColor?.toColor() ?: Pink40, CircleShape)
                             .align(CenterVertically)
                     ) //todo: generate color unique per language
 
