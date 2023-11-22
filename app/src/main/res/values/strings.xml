@@ -50,5 +50,7 @@
     <string name="user_repo_type_owner">Owner</string>
     <string name="user_repo_type_private">Private</string>
     <string name="user_repo_type_public">Public</string>
-    <string name="user_repo_type_member">Memberg</string>
+    <string name="user_repo_type_member">Member</string>
+    <string name="user_repository_label_sort">"Sort: "</string>
+    <string name="user_repository_clear_all_filter">Clear all filter</string>
 </resources>

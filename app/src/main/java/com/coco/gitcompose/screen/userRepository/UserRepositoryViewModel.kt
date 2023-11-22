@@ -14,9 +14,14 @@ import com.coco.gitcompose.core.ui.MessageType
 import com.coco.gitcompose.core.ui.SnackbarState
 import com.coco.gitcompose.core.util.languageToColor
 import com.coco.gitcompose.usecase.GithubRepositoryUseCase
+import com.coco.gitcompose.usecase.GithubUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,13 +29,53 @@ import javax.inject.Inject
 @HiltViewModel
 class UserRepositoryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val githubUserUseCase: GithubUserUseCase,
     private val githubRepositoryUseCase: GithubRepositoryUseCase
 ) : ViewModel() {
     private val _uiState = savedStateHandle.getMutableStateFlow(UserRepositoryUiState())
     val uiState: StateFlow<UserRepositoryUiState> = _uiState.asStateFlow()
 
+    private var loadJobRepo: Job? = null
+
     init {
+        viewModelScope.launch {
+            githubUserUseCase
+                .getStreamCurrentUser(true)
+                .onEach { user ->
+                    _uiState.update {
+                        it.copy(
+                            loginName = user.login
+                        )
+                    }
+                }
+                .launchIn(this)
+        }
+
         loadRepo(
+            selectedSortBy = SortBy.DESC,
+            selectedRepoSort = RepoSort.PUSHED,
+            selectedType = RepoType.ALL
+        )
+    }
+
+    fun filterTypeSelected(repoTypeLabel: RepoTypeLabel) {
+        loadRepo(
+            showFullLoading = true,
+            selectedType = repoTypeLabel.repoType
+        )
+    }
+
+    fun filterSortSelected(sortLabel: SortLabel) {
+        loadRepo(
+            showFullLoading = true,
+            selectedSortBy = sortLabel.sortBy,
+            selectedRepoSort = sortLabel.repoSort
+        )
+    }
+
+    fun resetFilter() {
+        loadRepo(
+            showFullLoading = true,
             selectedSortBy = SortBy.DESC,
             selectedRepoSort = RepoSort.PUSHED,
             selectedType = RepoType.ALL
@@ -46,7 +91,8 @@ class UserRepositoryViewModel @Inject constructor(
     ) {
         updateSortAndFilter(selectedSortBy, selectedRepoSort, selectedType)
 
-        viewModelScope.launch {
+        loadJobRepo?.cancel()
+        loadJobRepo = viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
                     isPullToRefresh = showPullToRefresh,
@@ -74,21 +120,23 @@ class UserRepositoryViewModel @Inject constructor(
                     )
                 }
             } catch (ex: Exception) {
-                Log.e(UserRepositoryViewModel::class.simpleName, ex.message, ex)
-                _uiState.update { state ->
-                    if (showFullLoading) {
-                        state.copy(
-                            isPullToRefresh = false,
-                            ownerRepoUiState = OwnerRepoUiState.Error(messageError = R.string.common_server_error)
-                        )
-                    } else {
-                        state.copy(
-                            isPullToRefresh = false,
-                            snackbarState = SnackbarState(
-                                R.string.common_server_error,
-                                MessageType.ERROR
+                if (ex !is CancellationException) {
+                    Log.e(UserRepositoryViewModel::class.simpleName, ex.message, ex)
+                    _uiState.update { state ->
+                        if (showFullLoading) {
+                            state.copy(
+                                isPullToRefresh = false,
+                                ownerRepoUiState = OwnerRepoUiState.Error(messageError = R.string.common_server_error)
                             )
-                        )
+                        } else {
+                            state.copy(
+                                isPullToRefresh = false,
+                                snackbarState = SnackbarState(
+                                    R.string.common_server_error,
+                                    MessageType.ERROR
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -109,56 +157,56 @@ class UserRepositoryViewModel @Inject constructor(
                 RepoSort.PUSHED,
                 SortBy.DESC,
                 R.string.user_repo_recently_pushed,
-                selected = selectedRepoSort == RepoSort.PUSHED || selectedSortBy == SortBy.DESC
+                selected = selectedRepoSort == RepoSort.PUSHED && selectedSortBy == SortBy.DESC,
+                default = true
             ),
             SortLabel(
                 RepoSort.PUSHED,
                 SortBy.ASC,
                 R.string.user_repo_least_recently_pushed,
                 true,
-                selected = selectedRepoSort == RepoSort.PUSHED || selectedSortBy == SortBy.ASC
+                selected = selectedRepoSort == RepoSort.PUSHED && selectedSortBy == SortBy.ASC
             ),
 
             SortLabel(
                 RepoSort.CREATED,
                 SortBy.DESC,
                 R.string.user_repo_newest_update,
-                selected = selectedRepoSort == RepoSort.CREATED || selectedSortBy == SortBy.DESC
+                selected = selectedRepoSort == RepoSort.CREATED && selectedSortBy == SortBy.DESC
             ),
             SortLabel(
                 RepoSort.CREATED,
                 SortBy.ASC,
                 R.string.user_repo_oldest_update,
                 true,
-                selected = selectedRepoSort == RepoSort.CREATED || selectedSortBy == SortBy.ASC
+                selected = selectedRepoSort == RepoSort.CREATED && selectedSortBy == SortBy.ASC
             ),
 
             SortLabel(
                 RepoSort.UPDATED,
                 SortBy.DESC,
                 R.string.user_repo_newest_created,
-                selected = selectedRepoSort == RepoSort.UPDATED || selectedSortBy == SortBy.DESC
+                selected = selectedRepoSort == RepoSort.UPDATED && selectedSortBy == SortBy.DESC
             ),
             SortLabel(
                 RepoSort.UPDATED,
                 SortBy.ASC,
                 R.string.user_repo_oldest_created,
                 true,
-                selected = selectedRepoSort == RepoSort.UPDATED || selectedSortBy == SortBy.ASC
+                selected = selectedRepoSort == RepoSort.UPDATED && selectedSortBy == SortBy.ASC
             ),
 
             SortLabel(
                 RepoSort.FULL_NAME,
                 SortBy.ASC,
                 R.string.user_repo_name_asc,
-                selected = selectedRepoSort == RepoSort.FULL_NAME || selectedSortBy == SortBy.ASC
+                selected = selectedRepoSort == RepoSort.FULL_NAME && selectedSortBy == SortBy.ASC
             ),
             SortLabel(
                 RepoSort.FULL_NAME,
                 SortBy.DESC,
                 R.string.user_repo_name_desc,
-                true,
-                selected = selectedRepoSort == RepoSort.FULL_NAME || selectedSortBy == SortBy.DESC
+                selected = selectedRepoSort == RepoSort.FULL_NAME && selectedSortBy == SortBy.DESC
             )
         )
 
@@ -166,7 +214,8 @@ class UserRepositoryViewModel @Inject constructor(
             RepoTypeLabel(
                 RepoType.ALL,
                 R.string.user_repo_type_all,
-                selected = selectedType == RepoType.ALL
+                selected = selectedType == RepoType.ALL,
+                default = true
             ),
             RepoTypeLabel(
                 RepoType.PRIVATE,
@@ -190,12 +239,19 @@ class UserRepositoryViewModel @Inject constructor(
             ),
         )
 
+        var filterCount = 0
         val selectedSort = sortLabels.first {
             it.selected
+        }
+        if (!selectedSort.default) {
+            filterCount += 1
         }
 
         val selectedFilter = filterLabels.first {
             it.selected
+        }
+        if (!selectedFilter.default) {
+            filterCount += 1
         }
 
         _uiState.update {
@@ -203,7 +259,8 @@ class UserRepositoryViewModel @Inject constructor(
                 listSortOptions = sortLabels,
                 listRepoTypes = filterLabels,
                 selectedSortOption = selectedSort,
-                selectedRepoType = selectedFilter
+                selectedRepoType = selectedFilter,
+                filterCount = filterCount
             )
         }
     }

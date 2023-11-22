@@ -22,7 +22,8 @@ data class UserRepositoryUiState(
     val currentPage: Int = 1,
     val loadingNextPage: Boolean = true,
     val isPullToRefresh: Boolean = false,
-    val loginName: String = ""
+    val loginName: String = "",
+    val filterCount: Int = 0
 ) : Parcelable
 
 @Parcelize
@@ -43,14 +44,16 @@ data class SortLabel(
     val sortBy: SortBy,
     @StringRes val label: Int,
     val divider: Boolean = false,
-    val selected: Boolean = false
+    val selected: Boolean = false,
+    val default: Boolean = false
 ) : Parcelable
 
 @Parcelize
 data class RepoTypeLabel(
     val repoType: RepoType,
     @StringRes val label: Int,
-    val selected: Boolean = false
+    val selected: Boolean = false,
+    val default: Boolean = false
 ) : Parcelable
 
 @Parcelize
