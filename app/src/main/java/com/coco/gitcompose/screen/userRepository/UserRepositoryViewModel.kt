@@ -107,16 +107,25 @@ class UserRepositoryViewModel @Inject constructor(
         )
     }
 
+    fun loadNextPage() {
+        loadRepo(showFullLoading = false, showPullToRefresh = false)
+    }
+
     private fun loadRepo(
         showFullLoading: Boolean = true,
         showPullToRefresh: Boolean = false,
+        loadNextPage: Boolean = false,
         selectedSortBy: SortBy = _uiState.value.selectedSortOption.sortBy,
         selectedRepoSort: RepoSort = _uiState.value.selectedSortOption.repoSort,
         selectedType: RepoType = _uiState.value.selectedRepoType.repoType
     ) {
         updateSortAndFilter(selectedSortBy, selectedRepoSort, selectedType)
 
-        loadJobRepo?.cancel()
+        var page = _uiState.value.currentPage
+        if (!loadNextPage) {
+            page = 0
+            loadJobRepo?.cancel()
+        }
         loadJobRepo = viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
@@ -130,7 +139,7 @@ class UserRepositoryViewModel @Inject constructor(
                     githubRepositoryUseCase.getRemoteCurrentUserRepository(
                         sort = selectedRepoSort,
                         perPage = 10,
-                        page = 1,
+                        page = page + 1,
                         sortBy = selectedSortBy,
                         filterBy = selectedType,
                         savedInCache = savedInCache,
@@ -140,6 +149,8 @@ class UserRepositoryViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         isPullToRefresh = false,
+                        currentPage = page + 1,
+                        loadingNextPage = ownerRepos.isNotEmpty(),
                         ownerRepoUiState = if (ownerRepos.isEmpty()) OwnerRepoUiState.Empty(
                             !state.selectedRepoType.default || !state.selectedSortOption.default
                         ) else OwnerRepoUiState.Success(ownerRepos)
@@ -152,11 +163,13 @@ class UserRepositoryViewModel @Inject constructor(
                         if (showFullLoading) {
                             state.copy(
                                 isPullToRefresh = false,
+                                loadingNextPage = false,
                                 ownerRepoUiState = OwnerRepoUiState.Error(messageError = R.string.common_server_error)
                             )
                         } else {
                             state.copy(
                                 isPullToRefresh = false,
+                                loadingNextPage = false,
                                 snackbarState = SnackbarState(
                                     R.string.common_server_error,
                                     MessageType.ERROR

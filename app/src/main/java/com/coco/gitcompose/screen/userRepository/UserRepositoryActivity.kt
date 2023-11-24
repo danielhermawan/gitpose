@@ -140,6 +140,10 @@ class UserRepositoryActivity : ComponentActivity() {
                                 viewModel.reloadPage()
                             }
 
+                            override fun onLoadNextPage() {
+                                viewModel.loadNextPage()
+                            }
+
                             override fun onRepositoryClick() {
                                 //todo: go to repository detail
                             }
@@ -219,6 +223,7 @@ fun UserRepositoryContent(
             modifier = Modifier.fillMaxSize(),
             ownerRepoUiState = uiState.ownerRepoUiState,
             showPullToRefreshLoading = uiState.isPullToRefresh,
+            showLoadingNextPage = uiState.loadingNextPage,
             onRepositoryClick = {
                 screenListener.onRepositoryClick()
             },
@@ -233,6 +238,9 @@ fun UserRepositoryContent(
             },
             onScrollPassFirstItem = { zeroOffset ->
                 showTopElevation = zeroOffset
+            },
+            onLoadNextPage = {
+                screenListener.onLoadNextPage()
             }
 
         )
@@ -245,11 +253,13 @@ fun RepositoriesSection(
     modifier: Modifier = Modifier,
     ownerRepoUiState: OwnerRepoUiState,
     showPullToRefreshLoading: Boolean,
+    showLoadingNextPage: Boolean,
     onRepositoryClick: (OwnerRepoViewModel) -> Unit,
     onPullToRefresh: () -> Unit,
     onResetFilterClick: () -> Unit,
     onReloadPage: () -> Unit,
-    onScrollPassFirstItem: (Boolean) -> Unit
+    onScrollPassFirstItem: (Boolean) -> Unit,
+    onLoadNextPage: () -> Unit
 ) {
     val pullRefreshState =
         rememberPullRefreshState(showPullToRefreshLoading, { onPullToRefresh() })
@@ -298,8 +308,10 @@ fun RepositoriesSection(
                     recentRepos = ownerRepoUiState.recentRepos,
                     pullRefreshState = pullRefreshState,
                     enabledPullToRefresh = enabledPullToRefresh,
+                    showLoadingNextPage = showLoadingNextPage,
                     onRepoClick = { onRepositoryClick(it) },
-                    onScrollFirstItem = onScrollPassFirstItem
+                    onScrollFirstItem = onScrollPassFirstItem,
+                    onLoadNextPage = onLoadNextPage
                 )
             }
         }
@@ -321,8 +333,10 @@ fun RepoListSection(
     recentRepos: List<OwnerRepoViewModel>,
     pullRefreshState: PullRefreshState,
     enabledPullToRefresh: Boolean,
+    showLoadingNextPage: Boolean,
     onRepoClick: (OwnerRepoViewModel) -> Unit,
-    onScrollFirstItem: (Boolean) -> Unit
+    onScrollFirstItem: (Boolean) -> Unit,
+    onLoadNextPage: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -337,7 +351,6 @@ fun RepoListSection(
 
     LazyColumn(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.primaryContainer)
             .pullRefresh(pullRefreshState, enabled = enabledPullToRefresh),
         state = listState
     ) {
@@ -347,11 +360,29 @@ fun RepoListSection(
             RepoItem(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .clickable { onRepoClick(repo) },
                 repository = repo
             )
         }
+
+        if (showLoadingNextPage) {
+            item {
+                Box(modifier = modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 24.dp)) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+        }
+
     }
+
 }
 
 @Composable
@@ -359,6 +390,7 @@ fun RepoItem(
     modifier: Modifier = Modifier,
     repository: OwnerRepoViewModel
 ) {
+    //todo: implement pagination and item in here
     Column(
         modifier = modifier
     ) {

@@ -24,11 +24,11 @@ data class UserRepositoryUiState(
     val selectedRepoType: RepoTypeLabel = RepoTypeLabel(RepoType.ALL, R.string.user_repo_type_all),
     val listRepoTypes: List<RepoTypeLabel> = emptyList(),
     val ownerRepoUiState: OwnerRepoUiState = OwnerRepoUiState.Loading,
-    val currentPage: Int = 1,
+    val currentPage: Int = 0,
     val loadingNextPage: Boolean = true,
     val isPullToRefresh: Boolean = false,
     val loginName: String = "",
-    val filterCount: Int = 0
+    val filterCount: Int = 0,
 ) : Parcelable
 
 @Parcelize

@@ -9,6 +9,8 @@ interface ScreenListener {
 
     fun onReloadPage() {}
 
+    fun onLoadNextPage() {}
+
     fun onResetFilterClick() {}
 
     fun onRepositoryClick() {}
