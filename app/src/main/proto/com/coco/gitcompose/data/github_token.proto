@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "com.coco.gitcompose.data";
+option java_multiple_files = true;
+
+message GithubToken {
+   string access_token = 1;
+   int64 expired_in = 2;
+   string refresh_token = 3;
+   int64 refresh_token_expires_in = 4;
+}

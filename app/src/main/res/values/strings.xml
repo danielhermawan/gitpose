@@ -16,4 +16,41 @@
 
 <resources>
     <string name="app_name">Gitpose</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="common_server_error">There is problem with connection to server</string>
+
+    <string name="login_sign_in_button">SIGN IN WITH GITHUB</string>
+    <string name="login_github_logo">Github Logo</string>
+    <string name="login_github_error">Github authentication error</string>
+    <string name="login_sign_info_text_info">Use your personal account or Github Enterprise Cloud account to sign in on Github.com</string>
+    <string name="landing_button_logout">Logout</string>
+    <string name="landing_tab_title_home">Home</string>
+    <string name="landing_tab_title_notification">Notifications</string>
+    <string name="landing_tab_title_explore">Explore</string>
+    <string name="landing_tab_title_profile">Profile</string>
+    <string name="landing_error_load_user_data">Failed to load user data</string>
+    <string name="landing_error_load_repo_data">Failed to load repo data</string>
+    <string name="landing_profile_followers_count">followers</string>
+    <string name="landing_profiler_section_popular">Recent Repo</string>
+    <string name="landing_repo_empty_description">Empty Description</string>
+    <string name="landing_profile_menu_repositories">Repositories</string>
+    <string name="landing_profile_menu_organization">Organizations</string>
+    <string name="landing_profile_menu_starred">Starred</string>
+    <string name="landing_profile_menu_logout">Logout</string>
+    <string name="user_repo_recently_pushed">Recently pushed</string>
+    <string name="user_repo_least_recently_pushed">Least recently pushed</string>
+    <string name="user_repo_newest_update">Newest update</string>
+    <string name="user_repo_oldest_update">Oldest update</string>
+    <string name="user_repo_newest_created">Newest create</string>
+    <string name="user_repo_oldest_created">Oldest create</string>
+    <string name="user_repo_name_asc">Name ascending</string>
+    <string name="user_repo_name_desc">Name descending</string>
+    <string name="user_repo_type_all">All</string>
+    <string name="user_repo_type_owner">Owner</string>
+    <string name="user_repo_type_private">Private</string>
+    <string name="user_repo_type_public">Public</string>
+    <string name="user_repo_type_member">Member</string>
+    <string name="user_repository_label_sort">"Sort: "</string>
+    <string name="user_repository_clear_all_filter">Clear all filter</string>
 </resources>
