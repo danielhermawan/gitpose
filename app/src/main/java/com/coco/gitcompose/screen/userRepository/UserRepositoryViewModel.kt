@@ -20,6 +20,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -41,6 +42,16 @@ class UserRepositoryViewModel @Inject constructor(
         viewModelScope.launch {
             githubUserUseCase
                 .getStreamCurrentUser(true)
+                .catch {
+                    _uiState.update {
+                        it.copy(
+                            snackbarState = SnackbarState(
+                                R.string.common_server_error,
+                                MessageType.ERROR
+                            )
+                        )
+                    }
+                }
                 .onEach { user ->
                     _uiState.update {
                         it.copy(
@@ -82,6 +93,20 @@ class UserRepositoryViewModel @Inject constructor(
         )
     }
 
+    fun reloadPage() {
+        loadRepo(
+            showFullLoading = true,
+            showPullToRefresh = false
+        )
+    }
+
+    fun onPullToRefresh() {
+        loadRepo(
+            showFullLoading = false,
+            showPullToRefresh = true
+        )
+    }
+
     private fun loadRepo(
         showFullLoading: Boolean = true,
         showPullToRefresh: Boolean = false,
@@ -99,7 +124,6 @@ class UserRepositoryViewModel @Inject constructor(
                     ownerRepoUiState = if (showFullLoading) OwnerRepoUiState.Loading else state.ownerRepoUiState
                 )
             }
-
             try {
                 val savedInCache = selectedType == RepoType.ALL
                 val ownerRepos =
@@ -116,7 +140,9 @@ class UserRepositoryViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         isPullToRefresh = false,
-                        ownerRepoUiState = OwnerRepoUiState.Success(ownerRepos)
+                        ownerRepoUiState = if (ownerRepos.isEmpty()) OwnerRepoUiState.Empty(
+                            !state.selectedRepoType.default || !state.selectedSortOption.default
+                        ) else OwnerRepoUiState.Success(ownerRepos)
                     )
                 }
             } catch (ex: Exception) {

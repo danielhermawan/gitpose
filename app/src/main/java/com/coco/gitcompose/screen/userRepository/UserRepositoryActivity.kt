@@ -7,10 +7,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,13 +23,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,11 +58,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +84,8 @@ import com.coco.gitcompose.core.ui.GitposeSnackbarHost
 import com.coco.gitcompose.core.ui.handleSnackbarState
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -114,6 +132,17 @@ class UserRepositoryActivity : ComponentActivity() {
                                 viewModel.resetFilter()
                             }
 
+                            override fun onPullToRefresh() {
+                                viewModel.onPullToRefresh()
+                            }
+
+                            override fun onReloadPage() {
+                                viewModel.reloadPage()
+                            }
+
+                            override fun onRepositoryClick() {
+                                //todo: go to repository detail
+                            }
                         }
                     )
 
@@ -142,9 +171,8 @@ fun UserRepositoryScreen(
         },
         topBar = {
             UserRepositoryAppBar(
-                ownerName = uiState.loginName,
-                onBackPressed = { screenListener.onBackPressed() }
-            )
+                ownerName = uiState.loginName
+            ) { screenListener.onBackPressed() }
         },
         modifier = modifier
     ) { padding ->
@@ -187,8 +215,244 @@ fun UserRepositoryContent(
                 screenListener.onResetFilterClick()
             }
         )
+        RepositoriesSection(
+            modifier = Modifier.fillMaxSize(),
+            ownerRepoUiState = uiState.ownerRepoUiState,
+            showPullToRefreshLoading = uiState.isPullToRefresh,
+            onRepositoryClick = {
+                screenListener.onRepositoryClick()
+            },
+            onPullToRefresh = {
+                screenListener.onPullToRefresh()
+            },
+            onResetFilterClick = {
+                screenListener.onResetFilterClick()
+            },
+            onReloadPage = {
+                screenListener.onReloadPage()
+            },
+            onScrollPassFirstItem = { zeroOffset ->
+                showTopElevation = zeroOffset
+            }
+
+        )
     }
 }
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun RepositoriesSection(
+    modifier: Modifier = Modifier,
+    ownerRepoUiState: OwnerRepoUiState,
+    showPullToRefreshLoading: Boolean,
+    onRepositoryClick: (OwnerRepoViewModel) -> Unit,
+    onPullToRefresh: () -> Unit,
+    onResetFilterClick: () -> Unit,
+    onReloadPage: () -> Unit,
+    onScrollPassFirstItem: (Boolean) -> Unit
+) {
+    val pullRefreshState =
+        rememberPullRefreshState(showPullToRefreshLoading, { onPullToRefresh() })
+    val enabledPullToRefresh =
+        !showPullToRefreshLoading || ownerRepoUiState !is OwnerRepoUiState.Loading
+
+    var boxModifier = modifier
+        .pullRefresh(
+            pullRefreshState,
+            enabled = enabledPullToRefresh
+        )
+    if (ownerRepoUiState !is OwnerRepoUiState.Success) {
+        boxModifier = boxModifier.verticalScroll(rememberScrollState())
+    }
+    Box(
+        modifier = boxModifier
+    ) {
+        when (ownerRepoUiState) {
+            is OwnerRepoUiState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+
+            is OwnerRepoUiState.Error -> {
+                ErrorSection(
+                    modifier = Modifier.align(Alignment.Center),
+                    errorMessage = ownerRepoUiState.messageError,
+                    onTryAgainClick = onReloadPage
+                )
+            }
+
+            is OwnerRepoUiState.Empty -> {
+                EmptySection(
+                    modifier = Modifier.align(Alignment.Center),
+                    showResetFilter = ownerRepoUiState.showResetFilter,
+                    onResetFilterClick = onResetFilterClick
+                )
+            }
+
+            is OwnerRepoUiState.Success -> {
+                RepoListSection(
+                    recentRepos = ownerRepoUiState.recentRepos,
+                    pullRefreshState = pullRefreshState,
+                    enabledPullToRefresh = enabledPullToRefresh,
+                    onRepoClick = { onRepositoryClick(it) },
+                    onScrollFirstItem = onScrollPassFirstItem
+                )
+            }
+        }
+
+        PullRefreshIndicator(
+            refreshing = showPullToRefreshLoading,
+            state = pullRefreshState,
+            backgroundColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun RepoListSection(
+    modifier: Modifier = Modifier,
+    recentRepos: List<OwnerRepoViewModel>,
+    pullRefreshState: PullRefreshState,
+    enabledPullToRefresh: Boolean,
+    onRepoClick: (OwnerRepoViewModel) -> Unit,
+    onScrollFirstItem: (Boolean) -> Unit
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .map { index -> index == 0 }
+            .distinctUntilChanged()
+            .collect { zeroOffset ->
+                onScrollFirstItem(!zeroOffset)
+            }
+    }
+
+    LazyColumn(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .pullRefresh(pullRefreshState, enabled = enabledPullToRefresh),
+        state = listState
+    ) {
+        items(items = recentRepos, key = { repo ->
+            repo.id
+        }) { repo ->
+            RepoItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onRepoClick(repo) },
+                repository = repo
+            )
+        }
+    }
+}
+
+@Composable
+fun RepoItem(
+    modifier: Modifier = Modifier,
+    repository: OwnerRepoViewModel
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Spacer(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        )
+
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp),
+            color = MaterialTheme.colorScheme.background
+        )
+    }
+}
+
+@Composable
+fun ErrorSection(
+    modifier: Modifier = Modifier,
+    @StringRes errorMessage: Int?,
+    onTryAgainClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = errorMessage ?: R.string.common_server_error),
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
+        )
+        Button(
+            shape = MaterialTheme.shapes.small,
+            onClick = onTryAgainClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            ),
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.user_repository_error_try_again),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+fun EmptySection(
+    modifier: Modifier = Modifier,
+    showResetFilter: Boolean,
+    onResetFilterClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.user_repository_empty_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        if (showResetFilter) {
+            Text(
+                text = stringResource(R.string.user_repository_empty_section_reset_filter_description),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+
+            Button(
+                shape = MaterialTheme.shapes.small,
+                onClick = { onResetFilterClick() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.user_repositories_reset_all_filter),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun FilterBar(
@@ -206,7 +470,7 @@ fun FilterBar(
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
         modifier = modifier,
-        shadowElevation = if (showTopElevation) 16.dp else 0.dp
+        shadowElevation = if (showTopElevation) 4.dp else 0.dp
     ) {
         Column {
             Row(
@@ -498,7 +762,6 @@ fun FilterButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserRepositoryAppBar(
-    modifier: Modifier = Modifier,
     ownerName: String = "",
     onBackPressed: () -> Unit = {}
 ) {
@@ -552,8 +815,9 @@ fun UserRepositoryScreen() {
         ) {
             UserRepositoryScreen(
                 uiState = UserRepositoryUiState(
-                    loginName = "danielhermawan"
-                ),
+                    loginName = "danielhermawan",
+
+                    ),
                 screenListener = object : ScreenListener {}
             )
         }

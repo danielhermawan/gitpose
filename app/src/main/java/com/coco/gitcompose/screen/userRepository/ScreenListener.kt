@@ -7,5 +7,12 @@ interface ScreenListener {
 
     fun onFilterSortSelected(sortLabel: SortLabel) {}
 
+    fun onReloadPage() {}
+
     fun onResetFilterClick() {}
+
+    fun onRepositoryClick() {}
+
+    fun onPullToRefresh() {}
+
 }

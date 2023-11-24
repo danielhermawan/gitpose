@@ -53,4 +53,8 @@
     <string name="user_repo_type_member">Member</string>
     <string name="user_repository_label_sort">"Sort: "</string>
     <string name="user_repository_clear_all_filter">Clear all filter</string>
+    <string name="user_repository_empty_title">There aren\'t any repositories.</string>
+    <string name="user_repositories_reset_all_filter">RESET ALL FILTERS</string>
+    <string name="user_repository_empty_section_reset_filter_description">Use fewer filters or reset all filter</string>
+    <string name="user_repository_error_try_again">Try Again</string>
 </resources>

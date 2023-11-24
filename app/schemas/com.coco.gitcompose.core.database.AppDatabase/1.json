@@ -1,0 +1,172 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "cba86d383030abbe9cb486197420d11f",
+    "entities": [
+      {
+        "tableName": "user_repository",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `full_name` TEXT NOT NULL, `private` INTEGER NOT NULL, `forked_from` TEXT, `star_count` INTEGER NOT NULL, `language` TEXT, `owner_name` TEXT NOT NULL, `created` INTEGER NOT NULL, `updated` INTEGER NOT NULL, `pushed` INTEGER NOT NULL, `htmlUrl` TEXT NOT NULL, `description` TEXT, `fork` INTEGER NOT NULL, `forks_count` INTEGER NOT NULL, `watchers_count` INTEGER NOT NULL, `default_branch` TEXT NOT NULL, `open_issues_count` INTEGER NOT NULL, `is_template` INTEGER NOT NULL, `topics` TEXT NOT NULL, `visibility` TEXT NOT NULL, `ownerLogin` TEXT NOT NULL, `owner_avatar_url` TEXT NOT NULL, `parent_full_name` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "full_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "private",
+            "columnName": "private",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forkedFrom",
+            "columnName": "forked_from",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "starCount",
+            "columnName": "star_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ownerName",
+            "columnName": "owner_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "created",
+            "columnName": "created",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updated",
+            "columnName": "updated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pushed",
+            "columnName": "pushed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "htmlUrl",
+            "columnName": "htmlUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fork",
+            "columnName": "fork",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forksCount",
+            "columnName": "forks_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "watchersCount",
+            "columnName": "watchers_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "defaultBranch",
+            "columnName": "default_branch",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openIssueCount",
+            "columnName": "open_issues_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isTemplate",
+            "columnName": "is_template",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topics",
+            "columnName": "topics",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visibility",
+            "columnName": "visibility",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerLogin",
+            "columnName": "ownerLogin",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerAvatarUrl",
+            "columnName": "owner_avatar_url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentFullName",
+            "columnName": "parent_full_name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cba86d383030abbe9cb486197420d11f')"
+    ]
+  }
+}

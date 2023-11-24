@@ -2,6 +2,7 @@ package com.coco.gitcompose.screen.userRepository
 
 import android.os.Parcelable
 import androidx.annotation.StringRes
+import com.coco.gitcompose.R
 import com.coco.gitcompose.core.datamodel.RepoSort
 import com.coco.gitcompose.core.datamodel.RepoType
 import com.coco.gitcompose.core.datamodel.SortBy
@@ -14,9 +15,13 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class UserRepositoryUiState(
     val snackbarState: SnackbarState? = null,
-    val selectedSortOption: SortLabel = SortLabel(RepoSort.PUSHED, SortBy.DESC, 0),
+    val selectedSortOption: SortLabel = SortLabel(
+        RepoSort.PUSHED,
+        SortBy.DESC,
+        R.string.user_repo_recently_pushed
+    ),
     val listSortOptions: List<SortLabel> = emptyList(),
-    val selectedRepoType: RepoTypeLabel = RepoTypeLabel(RepoType.ALL, 0),
+    val selectedRepoType: RepoTypeLabel = RepoTypeLabel(RepoType.ALL, R.string.user_repo_type_all),
     val listRepoTypes: List<RepoTypeLabel> = emptyList(),
     val ownerRepoUiState: OwnerRepoUiState = OwnerRepoUiState.Loading,
     val currentPage: Int = 1,
@@ -56,7 +61,6 @@ data class RepoTypeLabel(
     val default: Boolean = false
 ) : Parcelable
 
-@Parcelize
 sealed interface OwnerRepoUiState : Parcelable {
     @Parcelize
     data object Loading : OwnerRepoUiState
@@ -69,5 +73,10 @@ sealed interface OwnerRepoUiState : Parcelable {
     @Parcelize
     data class Success(
         val recentRepos: List<OwnerRepoViewModel> = emptyList<OwnerRepoViewModel>().toImmutableList()
+    ) : OwnerRepoUiState
+
+    @Parcelize
+    data class Empty(
+        val showResetFilter: Boolean = false
     ) : OwnerRepoUiState
 }
