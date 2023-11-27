@@ -108,7 +108,7 @@ class UserRepositoryViewModel @Inject constructor(
     }
 
     fun loadNextPage() {
-        loadRepo(showFullLoading = false, showPullToRefresh = false)
+        loadRepo(showFullLoading = false, showPullToRefresh = false, loadNextPage = true)
     }
 
     private fun loadRepo(
@@ -130,7 +130,8 @@ class UserRepositoryViewModel @Inject constructor(
             _uiState.update { state ->
                 state.copy(
                     isPullToRefresh = showPullToRefresh,
-                    ownerRepoUiState = if (showFullLoading) OwnerRepoUiState.Loading else state.ownerRepoUiState
+                    ownerRepoUiState = if (showFullLoading) OwnerRepoUiState.Loading else state.ownerRepoUiState,
+                    loadNextPageOnProgress = loadNextPage
                 )
             }
             try {
@@ -151,6 +152,7 @@ class UserRepositoryViewModel @Inject constructor(
                         isPullToRefresh = false,
                         currentPage = page + 1,
                         loadingNextPage = ownerRepos.isNotEmpty(),
+                        loadNextPageOnProgress = false,
                         ownerRepoUiState = if (ownerRepos.isEmpty()) OwnerRepoUiState.Empty(
                             !state.selectedRepoType.default || !state.selectedSortOption.default
                         ) else OwnerRepoUiState.Success(ownerRepos)
@@ -164,12 +166,14 @@ class UserRepositoryViewModel @Inject constructor(
                             state.copy(
                                 isPullToRefresh = false,
                                 loadingNextPage = false,
+                                loadNextPageOnProgress = false,
                                 ownerRepoUiState = OwnerRepoUiState.Error(messageError = R.string.common_server_error)
                             )
                         } else {
                             state.copy(
                                 isPullToRefresh = false,
                                 loadingNextPage = false,
+                                loadNextPageOnProgress = false,
                                 snackbarState = SnackbarState(
                                     R.string.common_server_error,
                                     MessageType.ERROR

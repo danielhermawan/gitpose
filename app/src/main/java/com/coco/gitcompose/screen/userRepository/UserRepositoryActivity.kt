@@ -356,12 +356,12 @@ fun RepoListSection(
             }
     }
 
-    if (loadNextPageOnProgress) {
+    if (showLoadingNextPage && !loadNextPageOnProgress) {
         LaunchedEffect(listState) {
             snapshotFlow { listState.layoutInfo }
                 .map { layoutInfo ->
                     (layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                        ?: 0) >= layoutInfo.totalItemsCount - 5
+                        ?: 0) >= layoutInfo.totalItemsCount - 2
                 }
                 .distinctUntilChanged()
                 .collect { loadMore ->
@@ -424,12 +424,11 @@ fun RepoItem(
         ) {
             Icon(painter = painterResource(id = R.drawable.ic_lock_24), contentDescription = null)
 
-            Spacer(modifier = modifier.width(8.dp))
-
             Text(
                 repository.name,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
 
@@ -449,17 +448,17 @@ fun RepoItem(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_fork_24),
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
                 )
 
-                Spacer(modifier = modifier.width(8.dp))
-
                 Text(
-                    "Forked from $repository.forkedFrom",
+                    "Forked from ${repository.forkedFrom}",
                     fontWeight = FontWeight.Light,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
@@ -500,6 +499,8 @@ fun RepoItem(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
 
         Divider(
             modifier = Modifier
