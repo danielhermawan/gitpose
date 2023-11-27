@@ -143,7 +143,7 @@ class UserRepositoryViewModel @Inject constructor(
                         sortBy = selectedSortBy,
                         filterBy = selectedType,
                         savedInCache = savedInCache,
-                        replaceCache = true
+                        replaceCache = !loadNextPage
                     ).map { mapRepoDataModel(it) }
 
                 _uiState.update { state ->

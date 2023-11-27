@@ -75,6 +75,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -83,6 +84,9 @@ import com.coco.gitcompose.R
 import com.coco.gitcompose.core.ui.GitposeSnackbarHost
 import com.coco.gitcompose.core.ui.handleSnackbarState
 import com.coco.gitcompose.core.ui.theme.GitposeTheme
+import com.coco.gitcompose.core.ui.theme.Pink40
+import com.coco.gitcompose.core.ui.theme.Yellow70
+import com.coco.gitcompose.core.util.toColor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -224,6 +228,7 @@ fun UserRepositoryContent(
             ownerRepoUiState = uiState.ownerRepoUiState,
             showPullToRefreshLoading = uiState.isPullToRefresh,
             showLoadingNextPage = uiState.loadingNextPage,
+            loadNextPageOnProgress = uiState.loadNextPageOnProgress,
             onRepositoryClick = {
                 screenListener.onRepositoryClick()
             },
@@ -242,7 +247,6 @@ fun UserRepositoryContent(
             onLoadNextPage = {
                 screenListener.onLoadNextPage()
             }
-
         )
     }
 }
@@ -254,6 +258,7 @@ fun RepositoriesSection(
     ownerRepoUiState: OwnerRepoUiState,
     showPullToRefreshLoading: Boolean,
     showLoadingNextPage: Boolean,
+    loadNextPageOnProgress: Boolean,
     onRepositoryClick: (OwnerRepoViewModel) -> Unit,
     onPullToRefresh: () -> Unit,
     onResetFilterClick: () -> Unit,
@@ -309,6 +314,7 @@ fun RepositoriesSection(
                     pullRefreshState = pullRefreshState,
                     enabledPullToRefresh = enabledPullToRefresh,
                     showLoadingNextPage = showLoadingNextPage,
+                    loadNextPageOnProgress = loadNextPageOnProgress,
                     onRepoClick = { onRepositoryClick(it) },
                     onScrollFirstItem = onScrollPassFirstItem,
                     onLoadNextPage = onLoadNextPage
@@ -334,6 +340,7 @@ fun RepoListSection(
     pullRefreshState: PullRefreshState,
     enabledPullToRefresh: Boolean,
     showLoadingNextPage: Boolean,
+    loadNextPageOnProgress: Boolean,
     onRepoClick: (OwnerRepoViewModel) -> Unit,
     onScrollFirstItem: (Boolean) -> Unit,
     onLoadNextPage: () -> Unit,
@@ -347,6 +354,23 @@ fun RepoListSection(
             .collect { zeroOffset ->
                 onScrollFirstItem(!zeroOffset)
             }
+    }
+
+    if (loadNextPageOnProgress) {
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.layoutInfo }
+                .map { layoutInfo ->
+                    (layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                        ?: 0) >= layoutInfo.totalItemsCount - 5
+                }
+                .distinctUntilChanged()
+                .collect { loadMore ->
+                    if (loadMore) {
+                        onLoadNextPage()
+                    }
+                }
+        }
+
     }
 
     LazyColumn(
@@ -368,9 +392,11 @@ fun RepoListSection(
 
         if (showLoadingNextPage) {
             item {
-                Box(modifier = modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 24.dp)) {
+                Box(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, bottom = 24.dp)
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier
                             .size(36.dp)
@@ -390,15 +416,90 @@ fun RepoItem(
     modifier: Modifier = Modifier,
     repository: OwnerRepoViewModel
 ) {
-    //todo: implement pagination and item in here
     Column(
         modifier = modifier
     ) {
-        Spacer(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+        ) {
+            Icon(painter = painterResource(id = R.drawable.ic_lock_24), contentDescription = null)
+
+            Spacer(modifier = modifier.width(8.dp))
+
+            Text(
+                repository.name,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (!repository.description.isNullOrEmpty()) {
+            Text(
+                repository.description,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        if (!repository.forkedFrom.isNullOrEmpty()) {
+            Row(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_fork_24),
+                    contentDescription = null
+                )
+
+                Spacer(modifier = modifier.width(8.dp))
+
+                Text(
+                    "Forked from $repository.forkedFrom",
+                    fontWeight = FontWeight.Light,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_star_filled),
+                contentDescription = "Star Icon",
+                modifier = Modifier.size(16.dp),
+                colorFilter = ColorFilter.tint(Yellow70)
+            )
+
+            Text(
+                text = "${repository.starCount}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+
+            if (!repository.language.isNullOrEmpty()) {
+                Spacer(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .size(12.dp)
+                        .background(repository.color?.toColor() ?: Pink40, CircleShape)
+                        .align(Alignment.CenterVertically)
+                )
+
+                Text(
+                    text = repository.language,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .align(Alignment.CenterVertically)
+                )
+            }
+        }
 
         Divider(
             modifier = Modifier

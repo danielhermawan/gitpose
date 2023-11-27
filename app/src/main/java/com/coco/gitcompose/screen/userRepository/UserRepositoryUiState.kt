@@ -26,6 +26,7 @@ data class UserRepositoryUiState(
     val ownerRepoUiState: OwnerRepoUiState = OwnerRepoUiState.Loading,
     val currentPage: Int = 0,
     val loadingNextPage: Boolean = true,
+    val loadNextPageOnProgress: Boolean = false,
     val isPullToRefresh: Boolean = false,
     val loginName: String = "",
     val filterCount: Int = 0,
