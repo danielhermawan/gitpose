@@ -422,7 +422,11 @@ fun RepoItem(
         Row(
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
         ) {
-            Icon(painter = painterResource(id = R.drawable.ic_lock_24), contentDescription = null)
+            Icon(
+                modifier = Modifier.size(16.dp),
+                painter = painterResource(id = R.drawable.ic_lock_24),
+                contentDescription = null
+            )
 
             Text(
                 repository.name,

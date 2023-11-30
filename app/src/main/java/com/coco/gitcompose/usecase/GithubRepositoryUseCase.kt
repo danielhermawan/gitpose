@@ -92,7 +92,13 @@ class DefaultGithubRepositoryUseCase @Inject constructor(
     ): List<RepoDataModel> {
         return withContext(ioDispatcher) {
             val currentUserRepos =
-                githubService.getCurrentUserRepos(sort.sortName, perPage, page, sortBy.sortByName)
+                githubService.getCurrentUserRepos(
+                    sort = sort.sortName,
+                    perPage = perPage,
+                    page = page,
+                    sortBy = sortBy.sortByName,
+                    type = filterBy.typeName
+                )
                     .map { repo ->
                         if (repo.fork) {
                             githubService.getRepoDetail(repo.owner.login, repo.name)
@@ -103,9 +109,9 @@ class DefaultGithubRepositoryUseCase @Inject constructor(
             if (savedInCache) {
                 val entities = mapToEntity(currentUserRepos)
                 if (replaceCache) {
-                    userRepositoryDao.insertRepository(entities)
-                } else {
                     userRepositoryDao.replaceDataInTransaction(entities)
+                } else {
+                    userRepositoryDao.insertRepository(entities)
                 }
             }
             currentUserRepos

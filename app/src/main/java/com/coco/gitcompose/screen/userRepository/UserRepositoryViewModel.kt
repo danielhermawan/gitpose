@@ -136,6 +136,9 @@ class UserRepositoryViewModel @Inject constructor(
             }
             try {
                 val savedInCache = selectedType == RepoType.ALL
+                val currentRepo =
+                    (_uiState.value.ownerRepoUiState as? OwnerRepoUiState.Success)?.recentRepos
+                        ?: emptyList()
                 val ownerRepos =
                     githubRepositoryUseCase.getRemoteCurrentUserRepository(
                         sort = selectedRepoSort,
@@ -147,15 +150,17 @@ class UserRepositoryViewModel @Inject constructor(
                         replaceCache = !loadNextPage
                     ).map { mapRepoDataModel(it) }
 
+                val newRepos = if (loadNextPage) currentRepo.plus(ownerRepos) else ownerRepos
+
                 _uiState.update { state ->
                     state.copy(
                         isPullToRefresh = false,
                         currentPage = page + 1,
                         loadingNextPage = ownerRepos.isNotEmpty(),
                         loadNextPageOnProgress = false,
-                        ownerRepoUiState = if (ownerRepos.isEmpty()) OwnerRepoUiState.Empty(
+                        ownerRepoUiState = if (newRepos.isEmpty()) OwnerRepoUiState.Empty(
                             !state.selectedRepoType.default || !state.selectedSortOption.default
-                        ) else OwnerRepoUiState.Success(ownerRepos)
+                        ) else OwnerRepoUiState.Success(newRepos)
                     )
                 }
             } catch (ex: Exception) {
