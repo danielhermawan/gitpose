@@ -25,7 +25,8 @@ data class RepoDataModel(
     @Json(name = "created_at") val createdAt: String,
     @Json(name = "updated_at") val updatedAt: String,
     @Json(name = "pushed_at") val pushedAt: String,
-    val parent: RepoParentDataModel? = null
+    val parent: RepoParentDataModel? = null,
+    var isStarred: Boolean = false
 )
 
 @JsonClass(generateAdapter = true)

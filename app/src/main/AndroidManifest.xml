@@ -54,6 +54,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".screen.landing.LandingActivity" />
         </activity>
+
+        <activity
+            android:name=".screen.trending.TrendingActivity"
+            android:exported="true"
+            android:label="@string/title_activity_login"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Gitpose">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".screen.landing.LandingActivity" />
+        </activity>
     </application>
 
 </manifest>

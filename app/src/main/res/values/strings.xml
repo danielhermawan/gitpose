@@ -57,4 +57,11 @@
     <string name="user_repositories_reset_all_filter">RESET ALL FILTERS</string>
     <string name="user_repository_empty_section_reset_filter_description">Use fewer filters or reset all filter</string>
     <string name="user_repository_error_try_again">Try Again</string>
+
+    <string name="trending_screen_title">Trending</string>
+    <string name="trending_filter_today">Today</string>
+    <string name="trending_filter_week">Week</string>
+    <string name="trending_filter_month">Month</string>
+    <string name="trending_filter_language">Language</string>
+    <string name="trending_filter_clear_all">Clear all filter</string>
 </resources>
